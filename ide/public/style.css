@@ -112,19 +112,35 @@ html, body {
   right: 0;
   height: 40px;
   z-index: 100;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  overflow: hidden;
+}
+
+#toolbar-scroll {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  background: var(--bg-toolbar);
-  border-bottom: 1px solid var(--border);
-  user-select: none;
+  height: 100%;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  scrollbar-width: none;          /* Firefox */
+}
+
+#toolbar-scroll::-webkit-scrollbar {
+  display: none;                  /* Chrome/Safari */
 }
 
 #toolbar-left {
   display: flex;
   align-items: center;
   min-width: 120px;
+  flex-shrink: 0;
 }
 
 #project-name {
@@ -141,7 +157,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 1;
+  flex-shrink: 0;
   justify-content: center;
 }
 
@@ -150,6 +166,7 @@ html, body {
   align-items: center;
   gap: 8px;
   min-width: 120px;
+  flex-shrink: 0;
   justify-content: flex-end;
 }
 
@@ -165,6 +182,7 @@ html, body {
   cursor: pointer;
   transition: opacity 0.15s, transform 0.1s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .toolbar-btn:hover {
@@ -192,6 +210,32 @@ html, body {
 .btn-export {
   background: var(--blue);
   color: var(--crust);
+}
+
+.btn-mode {
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.btn-mode.native {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.btn-zoom {
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  min-width: 28px;
 }
 
 .btn-theme {
@@ -505,6 +549,33 @@ html, body {
 }
 
 /* ============================================================
+   Game player panel
+   ============================================================ */
+#game-panel {
+  background: #000;
+}
+
+#game-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+#game-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+/* Desktop: game panel replaces console in the grid */
+#game-panel.active-game {
+  display: flex;
+  grid-area: console;
+  border-top: 1px solid var(--border);
+}
+
+/* ============================================================
    Mobile responsive — 768px breakpoint
    ============================================================ */
 @media (max-width: 768px) {
@@ -523,19 +594,42 @@ html, body {
   /* All panels occupy the full area; show only the active one */
   #sidebar,
   #editor-panel,
-  #console-panel {
+  #console-panel,
+  #game-panel {
     grid-area: panel;
     display: none;
   }
 
   #sidebar.active-panel,
   #editor-panel.active-panel,
-  #console-panel.active-panel {
+  #console-panel.active-panel,
+  #game-panel.active-panel {
     display: flex;
   }
 
   /* Hide resize handles on mobile */
   .resize-handle {
     display: none;
+  }
+
+  /* Allow native touch scrolling inside Monaco */
+  #editor-container,
+  #editor-container .overflow-guard,
+  #editor-container .monaco-scrollable-element,
+  #editor-container .monaco-editor {
+    touch-action: pan-y !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Larger tap targets for file tree */
+  .tree-item {
+    padding: 8px 8px;
+    font-size: 15px;
+  }
+
+  /* Larger tab buttons */
+  .tab-btn {
+    height: 34px;
+    font-size: 14px;
   }
 }

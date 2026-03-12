@@ -11,28 +11,80 @@ const { monaco, connectLsp } = window.MonacoIDE;
 const savedTheme = localStorage.getItem('ide-theme') || 'catppuccin-mocha';
 const editorEl = document.getElementById('editor-container');
 
+const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && window.innerWidth < 1024);
+
 const editor = monaco.editor.create(editorEl, {
   language: 'lua',
   theme: savedTheme,
   automaticLayout: true,
   minimap: { enabled: false },
-  fontSize: 14,
+  fontSize: isMobile ? 16 : 14,
   scrollBeyondLastLine: false,
   wordWrap: 'on',
-  renderLineHighlight: 'all',
+  renderLineHighlight: isMobile ? 'none' : 'all',
   cursorBlinking: 'smooth',
   smoothScrolling: true,
   tabSize: 2,
   insertSpaces: true,
+  // Mobile: use native scrolling instead of Monaco's custom scroller
+  scrollbar: isMobile ? {
+    vertical: 'auto',
+    horizontal: 'auto',
+    handleMouseWheel: true,
+    alwaysConsumeMouseWheel: false,
+  } : {},
+  // Mobile: disable hover widgets that get in the way
+  hover: isMobile ? { enabled: false } : {},
+  overviewRulerLanes: isMobile ? 0 : 3,
+  quickSuggestions: isMobile ? false : true,
+  parameterHints: isMobile ? { enabled: false } : {},
 });
+
+// Mobile: allow native touch scrolling inside Monaco's scroll container
+if (isMobile) {
+  const applyTouchFix = () => {
+    const monacoLines = editorEl.querySelector('.monaco-scrollable-element');
+    if (monacoLines) {
+      monacoLines.style.touchAction = 'pan-y';
+    }
+    // Also fix the overlay widgets container
+    const overlays = editorEl.querySelectorAll('.overflow-guard, .monaco-editor');
+    overlays.forEach(el => { el.style.touchAction = 'pan-y'; });
+  };
+  // Apply after Monaco finishes layout
+  setTimeout(applyTouchFix, 100);
+  editor.onDidChangeModel(() => setTimeout(applyTouchFix, 100));
+}
 
 // Apply theme to HTML element as well
 applyTheme(savedTheme === 'catppuccin-mocha' ? 'dark' : 'light');
 
 // Connect Lua Language Server (gracefully disabled if not configured on server)
 if (typeof connectLsp === 'function') {
-  connectLsp('ws://' + location.host + '/lsp');
+  const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  connectLsp(wsProto + '//' + location.host + '/lsp');
 }
+
+// ---------------------------------------------------------------------------
+// Font size zoom controls
+// ---------------------------------------------------------------------------
+const savedFontSize = parseInt(localStorage.getItem('ide-font-size'), 10) || 14;
+if (savedFontSize !== 14) editor.updateOptions({ fontSize: savedFontSize });
+
+document.getElementById('btn-zoom-in').addEventListener('click', () => {
+  const current = editor.getOption(monaco.editor.EditorOption.fontSize);
+  const next = Math.min(current + 2, 32);
+  editor.updateOptions({ fontSize: next });
+  localStorage.setItem('ide-font-size', next);
+});
+
+document.getElementById('btn-zoom-out').addEventListener('click', () => {
+  const current = editor.getOption(monaco.editor.EditorOption.fontSize);
+  const next = Math.max(current - 2, 8);
+  editor.updateOptions({ fontSize: next });
+  localStorage.setItem('ide-font-size', next);
+});
 
 // ---------------------------------------------------------------------------
 // State
@@ -397,7 +449,7 @@ function switchMobilePanel(panelId) {
   });
 
   // Show/hide panels
-  const panels = document.querySelectorAll('#sidebar, #editor-panel, #console-panel');
+  const panels = document.querySelectorAll('#sidebar, #editor-panel, #console-panel, #game-panel');
   panels.forEach((p) => {
     p.classList.toggle('active-panel', p.id === panelId);
   });
@@ -462,26 +514,125 @@ function setGameRunning(running) {
 // ---------------------------------------------------------------------------
 // Toolbar buttons
 // ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Run mode toggle: browser (love.js) vs native (desktop Love2D)
+// ---------------------------------------------------------------------------
+let runMode = localStorage.getItem('ide-run-mode') || 'browser';
+const runModeBtn = document.getElementById('btn-run-mode');
+const runModeIcon = document.getElementById('run-mode-icon');
+const runModeLabel = document.getElementById('run-mode-label');
+
+function updateRunModeUI() {
+  if (runMode === 'native') {
+    runModeIcon.textContent = '\u{1F5A5}';
+    runModeLabel.textContent = 'Native';
+    runModeBtn.classList.add('native');
+  } else {
+    runModeIcon.textContent = '\u{1F310}';
+    runModeLabel.textContent = 'Browser';
+    runModeBtn.classList.remove('native');
+  }
+}
+updateRunModeUI();
+
+runModeBtn.addEventListener('click', () => {
+  runMode = runMode === 'browser' ? 'native' : 'browser';
+  localStorage.setItem('ide-run-mode', runMode);
+  updateRunModeUI();
+});
+
+// ---------------------------------------------------------------------------
+// In-browser game player (love.js)
+// ---------------------------------------------------------------------------
+const gamePanel = document.getElementById('game-panel');
+const gameContainer = document.getElementById('game-container');
+const consolePanel = document.getElementById('console-panel');
+const gameTab = document.getElementById('tab-game');
+
+function launchBrowserGame() {
+  // Save any open file first
+  if (currentFilePath && isDirty) {
+    document.dispatchEvent(new Event('save-current-file'));
+  }
+  // Remove old iframe if any
+  const old = gameContainer.querySelector('iframe');
+  if (old) old.remove();
+
+  // Create fresh iframe pointing to love.js player
+  const iframe = document.createElement('iframe');
+  iframe.src = '/lovejs/player.html?_t=' + Date.now();
+  iframe.allow = 'autoplay';
+  iframe.setAttribute('allowfullscreen', '');
+  gameContainer.appendChild(iframe);
+
+  // Show game panel
+  gamePanel.style.removeProperty('display');
+  if (window.innerWidth <= 768) {
+    // Mobile: show Game tab and switch to it
+    gameTab.style.display = '';
+    switchMobilePanel('game-panel');
+  } else {
+    // Desktop: hide console, show game panel in its place
+    consolePanel.style.display = 'none';
+    gamePanel.classList.add('active-game');
+  }
+
+  setGameRunning(true);
+  showStatus('Running', 'ok');
+}
+
+function stopBrowserGame() {
+  // Remove iframe
+  const iframe = gameContainer.querySelector('iframe');
+  if (iframe) iframe.remove();
+
+  // Restore panels
+  gamePanel.style.display = 'none';
+  gamePanel.classList.remove('active-game');
+  if (window.innerWidth <= 768) {
+    gameTab.style.display = 'none';
+    switchMobilePanel('editor-panel');
+  } else {
+    consolePanel.style.removeProperty('display');
+  }
+
+  setGameRunning(false);
+  showStatus('Stopped', 'ok');
+}
+
 document.getElementById('btn-run').addEventListener('click', async () => {
-  try {
-    const res = await fetch('/api/run', { method: 'POST' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    setGameRunning(true);
-    showStatus('Running', 'ok');
-  } catch (err) {
-    showStatus(`Run failed: ${err.message}`, 'error');
+  if (gameRunning) return;
+  if (runMode === 'native') {
+    try {
+      const res = await fetch('/api/run', { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setGameRunning(true);
+      showStatus('Running (native)', 'ok');
+    } catch (err) {
+      showStatus(`Run failed: ${err.message}`, 'error');
+    }
+  } else {
+    launchBrowserGame();
   }
 });
 
 document.getElementById('btn-stop').addEventListener('click', async () => {
-  try {
-    const res = await fetch('/api/run/stop', { method: 'POST' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    setGameRunning(false);
-    showStatus('Stopped', 'ok');
-  } catch (err) {
-    showStatus(`Stop failed: ${err.message}`, 'error');
+  if (runMode === 'native') {
+    try {
+      const res = await fetch('/api/run/stop', { method: 'POST' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setGameRunning(false);
+      showStatus('Stopped', 'ok');
+    } catch (err) {
+      showStatus(`Stop failed: ${err.message}`, 'error');
+    }
+  } else {
+    stopBrowserGame();
   }
+});
+
+document.getElementById('btn-close-game').addEventListener('click', () => {
+  stopBrowserGame();
 });
 
 document.getElementById('btn-export').addEventListener('click', () => {
@@ -628,15 +779,5 @@ document.getElementById('btn-refresh-tree').addEventListener('click', loadFileTr
 // ---------------------------------------------------------------------------
 loadFileTree();
 
-// Sync game running state with server on page load
-(async () => {
-  try {
-    const res = await fetch('/api/run/status');
-    if (res.ok) {
-      const { running } = await res.json();
-      setGameRunning(running);
-    }
-  } catch {
-    // Non-fatal
-  }
-})();
+// Game always starts as not running on page load (in-browser player)
+setGameRunning(false);

@@ -2,7 +2,7 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
   <title>Love2D IDE</title>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/editor.bundle.css" />
@@ -12,25 +12,32 @@
 
   <!-- Top toolbar -->
   <header id="toolbar">
-    <div id="toolbar-left">
-      <span id="project-name">Love2D IDE</span>
-    </div>
-    <div id="toolbar-center">
-      <button id="btn-run" class="toolbar-btn btn-run" title="Run game (Ctrl+R)">
-        <span class="btn-icon">&#9654;</span> Run
-      </button>
-      <button id="btn-stop" class="toolbar-btn btn-stop" title="Stop game">
-        <span class="btn-icon">&#9632;</span> Stop
-      </button>
-      <button id="btn-export" class="toolbar-btn btn-export" title="Export .love file">
-        <span class="btn-icon">&#8595;</span> Export
-      </button>
-    </div>
-    <div id="toolbar-right">
-      <span id="status-msg" class="status-msg"></span>
-      <button id="btn-theme" class="toolbar-btn btn-theme" title="Toggle theme" aria-label="Toggle light/dark theme">
-        <span id="theme-icon">&#9790;</span>
-      </button>
+    <div id="toolbar-scroll">
+      <div id="toolbar-left">
+        <span id="project-name">Love2D IDE</span>
+      </div>
+      <div id="toolbar-center">
+        <button id="btn-run" class="toolbar-btn btn-run" title="Run game (Ctrl+R)">
+          <span class="btn-icon">&#9654;</span> Run
+        </button>
+        <button id="btn-stop" class="toolbar-btn btn-stop" title="Stop game">
+          <span class="btn-icon">&#9632;</span> Stop
+        </button>
+        <button id="btn-run-mode" class="toolbar-btn btn-mode" title="Toggle native/browser run mode">
+          <span id="run-mode-icon">&#127760;</span> <span id="run-mode-label">Browser</span>
+        </button>
+        <button id="btn-export" class="toolbar-btn btn-export" title="Export .love file">
+          <span class="btn-icon">&#8595;</span> Export
+        </button>
+      </div>
+      <div id="toolbar-right">
+        <span id="status-msg" class="status-msg"></span>
+        <button id="btn-zoom-out" class="toolbar-btn btn-zoom" title="Decrease font size">A-</button>
+        <button id="btn-zoom-in" class="toolbar-btn btn-zoom" title="Increase font size">A+</button>
+        <button id="btn-theme" class="toolbar-btn btn-theme" title="Toggle theme" aria-label="Toggle light/dark theme">
+          <span id="theme-icon">&#9790;</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -39,6 +46,7 @@
     <button class="tab-btn active" data-panel="sidebar">Files</button>
     <button class="tab-btn" data-panel="editor-panel">Editor</button>
     <button class="tab-btn" data-panel="console-panel">Console</button>
+    <button class="tab-btn" data-panel="game-panel" id="tab-game" style="display:none">Game</button>
   </nav>
 
   <!-- Main IDE layout -->
@@ -76,6 +84,17 @@
       </div>
       <div id="console-output" class="console-output">
         <span class="console-placeholder">Console output will appear here.</span>
+      </div>
+    </section>
+
+    <!-- Game player panel (hidden until Run is clicked) -->
+    <section id="game-panel" class="panel" data-panel="game-panel" style="display:none">
+      <div class="panel-header">
+        <span>Game</span>
+        <button id="btn-close-game" class="icon-btn" title="Close game">&#10005;</button>
+      </div>
+      <div id="game-container">
+        <!-- iframe injected by JS -->
       </div>
     </section>
 

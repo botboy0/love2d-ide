@@ -10,6 +10,7 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
     smallFont = love.graphics.newFont('assets/fonts/font.ttf', 24)
     love.graphics.setFont(smallFont)
+   print("hezo")
 end
 
 function love.draw()

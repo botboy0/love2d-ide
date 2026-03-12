@@ -14,7 +14,7 @@ A web-based IDE served by a Node.js server, accessible over local WiFi from any 
 ## Implementation Decisions
 
 ### Panel layout
-- VS Code style: sidebar file tree left, CodeMirror editor center, console panel bottom
+- VS Code style: sidebar file tree left, Monaco editor center, console panel bottom
 - Top toolbar bar with project name, Run button, Export button, and status indicators
 - All panel dividers are resizable by dragging
 - On mobile Chrome: tab-switching UI — show one panel at a time (files, editor, console) with tabs to switch between them
@@ -28,17 +28,25 @@ A web-based IDE served by a Node.js server, accessible over local WiFi from any 
 - Editor save writes the file AND immediately triggers game restart (full process kill+restart)
 - chokidar filesystem watch also detects external edits (e.g., from VS Code) and triggers restart
 - Both paths coexist — editor save for instant feedback, chokidar for external edit coverage
-- 300-500ms debounce with polling mode for WSL2 /mnt/c/ paths (decided in Phase 1)
+- 300-500ms debounce; usePolling: false (server runs Windows-native, NTFS events work — polling only needed if running from WSL)
 
 ### Error display
 - Love2D errors appear in console panel with file:line as clickable links
 - Clicking an error link opens the file at that line in the editor
 - Game process stays stopped on error — user reads error, fixes code, then manually clicks Run or saves to trigger reload (no auto-retry on error)
 
+### Editor
+- Monaco Editor (VS Code's editor component) — not CodeMirror
+- Custom theme: Catpuccin with vibrant accent colors (not muted defaults)
+- Dark mode: Catpuccin Mocha / Light mode: Catpuccin Latte — toggle switch in toolbar
+- Port from https://github.com/catppuccin/vscode — same token color format works since Monaco is VS Code's editor
+- Theme applies to the entire IDE shell (file tree, console, toolbar), not just the editor
+- Monaco has built-in LSP protocol support — wire LuaLS/lua-language-server through it
+
 ### Lua LSP
 - Must-have for Phase 3 — real-time syntax errors, autocomplete, and diagnostics in the editor
-- Use an existing solution (e.g., LuaLS/lua-language-server with a CodeMirror language client adapter)
-- Researcher should investigate available options for CodeMirror 6 + Lua LSP integration
+- Use LuaLS/lua-language-server with Monaco's built-in LSP support
+- Monaco handles the language client side natively
 
 ### .love export
 - Export button in the top toolbar
@@ -47,13 +55,13 @@ A web-based IDE served by a Node.js server, accessible over local WiFi from any 
 - Browser download only — no extra files saved to project directory
 
 ### Claude's Discretion
-- Exact CodeMirror 6 theme and keybindings
+- Exact vibrant accent color choices for the Catpuccin Mocha theme (which tokens get which accents)
 - Node.js server framework choice (Express, Koa, plain http, etc.)
 - WebSocket vs SSE for real-time console streaming
 - File tree component implementation details
 - .loveignore parsing implementation (glob library choice)
 - Mobile tab-switching UI design details
-- How to wire LSP to CodeMirror (protocol adapter approach)
+- Monaco-to-LuaLS wiring approach (monaco-languageclient or similar)
 
 </decisions>
 
@@ -62,7 +70,7 @@ A web-based IDE served by a Node.js server, accessible over local WiFi from any 
 
 - IDE must be accessible from mobile Chrome over WiFi — this is a hard requirement, not nice-to-have
 - Vanilla HTML/CSS/JS for v0.1 — no React/Vue framework (decided in Phase 1 context)
-- Everything runs on Windows filesystem (/mnt/c/...) — WSL is only for the Node.js server and CLI
+- Everything runs on Windows natively — Node.js server, Love2D, filesystem. WSL is only used for Claude Code
 - Love2D is spawned as a Windows native process (love.exe), not inside WSL
 
 </specifics>
