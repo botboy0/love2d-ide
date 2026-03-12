@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-01-PLAN.md (Love2D environment bootstrap and verification)
-last_updated: "2026-03-12T02:09:39.040Z"
-last_activity: 2026-03-12 — Plan 01-02 complete, CS50G repos cloned and template created
+stopped_at: Completed 01-03-PLAN.md (Android ADB deployment chain verified)
+last_updated: "2026-03-12T03:30:00.000Z"
+last_activity: 2026-03-12 — Plan 01-03 complete, Android deployment chain proven (ADB + Android 15 content URI method)
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 2
-  percent: 7
+  completed_plans: 3
+  percent: 10
 ---
 
 # Project State
@@ -25,29 +25,29 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 1 of 4 (Environment)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-03-12 — Plan 01-02 complete, CS50G repos cloned and template created
+Phase: 1 of 4 (Environment) — COMPLETE
+Plan: 3 of 3 in phase 1 — all done; next: Phase 2
+Status: Phase 1 complete, ready for Phase 2
+Last activity: 2026-03-12 — Plan 01-03 complete, Android deployment chain proven (ADB + Android 15 content URI method)
 
-Progress: [█░░░░░░░░░] 7%
+Progress: [█░░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: ~3 min
-- Total execution time: ~6 min
+- Total plans completed: 3
+- Average duration: ~12 min
+- Total execution time: ~36 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-environment | 2/3 | ~6 min | ~3 min |
+| 01-environment | 3/3 | ~36 min | ~12 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~3 min), 01-02 (~3 min)
-- Trend: Fast (environment tasks, minimal code)
+- Last 5 plans: 01-01 (~3 min), 01-02 (~3 min), 01-03 (~30 min)
+- Trend: 01-03 longer due to Android 15 scoped storage debugging
 
 *Updated after each plan completion*
 
@@ -67,6 +67,10 @@ Recent decisions affecting current work:
 - [01-02]: CS50G repos stored as gitlinks (embedded git repos), not submodules — adequate for reference browsing
 - [01-02]: push.lua sourced from Ulydev/push master (not CS50G repos which use deprecated getPixelScale)
 - [01-02]: conf.lua sets vsync as integer (1) not boolean — Love2D 11.x API change
+- [01-03]: ADB found at AppData/Local/Android/Sdk/platform-tools/adb.exe (Android Studio), not C:\platform-tools\
+- [01-03]: Android 15 scoped storage — file:// URI intent launch silently fails; must use MediaStore content URI
+- [01-03]: Android 15 deploy method: push to /sdcard/lovegame/, query MediaStore _id, launch via content://media/external/file/{id} with --grant-read-uri-permission
+- [01-03]: Wireless debugging at 192.168.178.79:34779; LOVE Loader app confirmed working on device
 
 ### Pending Todos
 
@@ -74,11 +78,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- WSL2 display/audio (WSLg) must be verified in Phase 1 before any other work — silent failures here waste hours
-- chokidar event storms on WSL2: polling mode required for cross-9P-boundary paths
+- chokidar event storms on WSL2: polling mode required for cross-9P-boundary paths (Phase 2+ concern)
+- Android 15 wireless debug IP (192.168.178.79:34779) may change if device reconnects — Phase 4 scripts must handle reconnection
 
 ## Session Continuity
 
-Last session: 2026-03-12T02:09:39.031Z
-Stopped at: Completed 01-01-PLAN.md (Love2D environment bootstrap and verification)
+Last session: 2026-03-12T03:30:00.000Z
+Stopped at: Completed 01-03-PLAN.md (Android ADB deployment chain verified)
 Resume file: None

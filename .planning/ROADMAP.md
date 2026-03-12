@@ -12,7 +12,7 @@ This milestone ships the foundation: a verified Love2D development environment, 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Environment** - Windows-native Love2D 11.5, display/audio, workspace, and ADB fully verified and ready
+- [x] **Phase 1: Environment** - Windows-native Love2D 11.5, display/audio, workspace, and ADB fully verified and ready (completed 2026-03-12)
 - [ ] **Phase 2: Pong** - Complete Pong game rebuilt from scratch including AI paddle assignment
 - [ ] **Phase 3: IDE Shell** - Electron app with file tree, Lua editor, run button, console, live reload, and .love export
 - [ ] **Phase 4: Preview and Deploy** - Browser preview via love.js and one-click Android deployment via ADB
@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. push.lua compatibility fix is applied and a CS50G project that uses push.lua launches without errors on Love2D 11.5
   4. Windows ADB platform-tools installed and `adb devices` works (callable from WSL via alias to adb.exe)
   5. Workspace directories `course/`, `projects/`, and `ide/` exist on Windows filesystem with the standard project template in place
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 01-01-PLAN.md — Install Love2D 11.5, Lua tooling in WSL, create test project, verify display + audio on Windows
@@ -92,7 +92,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Environment | 2/3 | In Progress|  |
+| 1. Environment | 3/3 | Complete   | 2026-03-12 |
 | 2. Pong | 0/3 | Not started | - |
 | 3. IDE Shell | 0/4 | Not started | - |
 | 4. Preview and Deploy | 0/2 | Not started | - |
