@@ -9,13 +9,13 @@ Requirements for initial release (Pong + IDE v0.1). Each maps to roadmap phases.
 
 ### Environment
 
-- [ ] **ENV-01**: Love2D 11.5 installed and verified working in WSL2 (`love --version` + render test)
-- [ ] **ENV-02**: Lua 5.1, LuaJIT, and LuaRocks installed
-- [ ] **ENV-03**: WSL2 display and audio verified (Love2D can open window and play sound)
-- [ ] **ENV-04**: CS50G repos (all 8 Love2D projects) cloned to `~/love2d-ide/course/`
-- [ ] **ENV-05**: push.lua compatibility fix applied for Love2D 11.x
-- [ ] **ENV-06**: Workspace directory structure created (`course/`, `projects/`, `ide/`)
-- [ ] **ENV-07**: ADB configured in WSL via Windows alias method
+- [x] **ENV-01**: Love2D 11.5 installed on Windows and verified working (`love --version` + render test with window and sound)
+- [x] **ENV-02**: Lua 5.1, LuaJIT, and LuaRocks installed (WSL for CLI use)
+- [x] **ENV-03**: Love2D opens a window with audio on Windows natively (no WSLg dependency)
+- [x] **ENV-04**: CS50G repos (all 8 Love2D projects) cloned to workspace `course/` directory
+- [x] **ENV-05**: push.lua compatibility fix applied for Love2D 11.x
+- [x] **ENV-06**: Workspace directory structure created (`course/`, `projects/`, `ide/`) on Windows filesystem
+- [ ] **ENV-07**: Windows ADB platform-tools installed, accessible from WSL via alias to adb.exe
 
 ### Pong Game
 
@@ -108,12 +108,12 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ENV-01 | Phase 1 | Pending |
-| ENV-02 | Phase 1 | Pending |
-| ENV-03 | Phase 1 | Pending |
-| ENV-04 | Phase 1 | Pending |
-| ENV-05 | Phase 1 | Pending |
-| ENV-06 | Phase 1 | Pending |
+| ENV-01 | Phase 1 | Complete |
+| ENV-02 | Phase 1 | Complete |
+| ENV-03 | Phase 1 | Complete |
+| ENV-04 | Phase 1 | Complete |
+| ENV-05 | Phase 1 | Complete |
+| ENV-06 | Phase 1 | Complete |
 | ENV-07 | Phase 1 | Pending |
 | PONG-01 | Phase 2 | Pending |
 | PONG-02 | Phase 2 | Pending |

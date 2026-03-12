@@ -32,8 +32,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Install Love2D 11.5, Lua tooling in WSL, create test project, verify display + audio on Windows
-- [ ] 01-02-PLAN.md — Clone CS50G repos, create workspace structure, build project template with patched push.lua
+- [x] 01-01-PLAN.md — Install Love2D 11.5, Lua tooling in WSL, create test project, verify display + audio on Windows
+- [x] 01-02-PLAN.md — Clone CS50G repos, create workspace structure, build project template with patched push.lua
 - [ ] 01-03-PLAN.md — Configure Windows ADB with WSL alias, end-to-end Android deployment test
 
 ### Phase 2: Pong
@@ -92,7 +92,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Environment | 0/3 | Not started | - |
+| 1. Environment | 2/3 | In progress | - |
 | 2. Pong | 0/3 | Not started | - |
 | 3. IDE Shell | 0/4 | Not started | - |
 | 4. Preview and Deploy | 0/2 | Not started | - |
