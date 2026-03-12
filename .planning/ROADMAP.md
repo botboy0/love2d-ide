@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Environment** - Windows-native Love2D 11.5, display/audio, workspace, and ADB fully verified and ready (completed 2026-03-12)
 - [x] **Phase 2: Pong Scaffold** - Project directory, assets, and pong-0 baseline verified (completed 2026-03-12)
-- [ ] **Phase 3: Web IDE** - Node.js web server with file tree, CodeMirror Lua editor, run button, console, live reload, and .love export — accessible over local WiFi from any browser
+- [ ] **Phase 3: Web IDE** - Node.js web server with file tree, Monaco Lua editor, run button, console, live reload, and .love export — accessible over local WiFi from any browser
 - [ ] **Phase 4: Pong Rebuild** - Complete Pong game rebuilt from scratch using the Web IDE, including AI paddle assignment
 - [ ] **Phase 5: Preview and Deploy** - Browser preview via love.js and one-click Android deployment via ADB
 
@@ -51,18 +51,23 @@ Plans:
 - [x] 02-01-PLAN.md — Set up project directory from template, copy assets/libraries, initialize DEVLOG.md, create pong-0 baseline
 
 ### Phase 3: Web IDE
-**Goal**: A web-based IDE accessible over local WiFi where a developer can browse project files, edit Lua code with syntax highlighting, run a Love2D game, see console output, and benefit from automatic live reload on save
+**Goal**: A web-based IDE accessible over local WiFi where a developer can browse project files, edit Lua code with syntax highlighting (Monaco Editor), run a Love2D game, see console output, and benefit from automatic live reload on save
 **Depends on**: Phase 1
 **Requirements**: IDE-01, IDE-02, IDE-03, IDE-04, IDE-05, IDE-06, IDE-07, IDE-08, IDE-09
 **Success Criteria** (what must be TRUE):
   1. Node.js server launches and is accessible from any device on the local network (binds 0.0.0.0)
-  2. Web UI has sidebar file tree, main CodeMirror editor, and bottom console panel
-  3. Developer can open any file from the file tree into the CodeMirror editor with Lua syntax highlighting
+  2. Web UI has sidebar file tree, main Monaco editor, and bottom console panel
+  3. Developer can open any file from the file tree into the Monaco editor with Lua syntax highlighting
   4. Clicking Run spawns the Love2D process on the host and stdout/stderr appears in the console panel in real time
   5. Saving a Lua file causes the game to automatically restart within one second (live reload)
   6. When Love2D reports an error, the IDE displays the file name and line number; developer can click it to navigate there
   7. Developer can export the current project as a `.love` file from the IDE
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Server foundation, Monaco Editor bundle with Catppuccin theme, UI shell with file tree and mobile tabs
+- [ ] 03-02-PLAN.md — Game execution: Run/Stop, console streaming, live reload, error display with clickable links
+- [ ] 03-03-PLAN.md — .love export with .loveignore, Lua LSP via lua-language-server, end-to-end verification
 
 ### Phase 4: Pong Rebuild
 **Goal**: A complete, independently-written Pong game with working AI paddle, built using the Web IDE
@@ -93,6 +98,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Environment | 3/3 | Complete | 2026-03-12 |
 | 2. Pong Scaffold | 1/1 | Complete | 2026-03-12 |
-| 3. Web IDE | 0/? | Not started | - |
+| 3. Web IDE | 0/3 | Not started | - |
 | 4. Pong Rebuild | 0/? | Not started | - |
 | 5. Preview and Deploy | 0/? | Not started | - |
