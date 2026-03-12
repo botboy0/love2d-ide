@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Love2D IDE</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/editor.bundle.css" />
+  <script src="/editor.bundle.js"></script>
+</head>
+<body>
+
+  <!-- Top toolbar -->
+  <header id="toolbar">
+    <div id="toolbar-left">
+      <span id="project-name">Love2D IDE</span>
+    </div>
+    <div id="toolbar-center">
+      <button id="btn-run" class="toolbar-btn btn-run" title="Run game (Ctrl+R)">
+        <span class="btn-icon">&#9654;</span> Run
+      </button>
+      <button id="btn-stop" class="toolbar-btn btn-stop" title="Stop game">
+        <span class="btn-icon">&#9632;</span> Stop
+      </button>
+      <button id="btn-export" class="toolbar-btn btn-export" title="Export .love file">
+        <span class="btn-icon">&#8595;</span> Export
+      </button>
+    </div>
+    <div id="toolbar-right">
+      <span id="status-msg" class="status-msg"></span>
+      <button id="btn-theme" class="toolbar-btn btn-theme" title="Toggle theme" aria-label="Toggle light/dark theme">
+        <span id="theme-icon">&#9790;</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile tab bar (visible only on small screens) -->
+  <nav id="mobile-tabs" aria-label="Panel tabs">
+    <button class="tab-btn active" data-panel="sidebar">Files</button>
+    <button class="tab-btn" data-panel="editor-panel">Editor</button>
+    <button class="tab-btn" data-panel="console-panel">Console</button>
+  </nav>
+
+  <!-- Main IDE layout -->
+  <main id="ide-layout">
+
+    <!-- Left sidebar: file tree -->
+    <aside id="sidebar" class="panel" data-panel="sidebar">
+      <div class="panel-header">
+        <span>Files</span>
+        <button id="btn-refresh-tree" class="icon-btn" title="Refresh file tree">&#8635;</button>
+      </div>
+      <div id="file-tree" class="file-tree"></div>
+    </aside>
+
+    <!-- Vertical resize handle -->
+    <div id="resize-vertical" class="resize-handle resize-vertical" title="Drag to resize"></div>
+
+    <!-- Center: Monaco editor -->
+    <section id="editor-panel" class="panel" data-panel="editor-panel">
+      <div class="panel-header">
+        <span id="editor-filename">No file open</span>
+        <span id="editor-dirty" class="dirty-indicator" hidden>&#9679;</span>
+      </div>
+      <div id="editor-container"></div>
+    </section>
+
+    <!-- Horizontal resize handle -->
+    <div id="resize-horizontal" class="resize-handle resize-horizontal" title="Drag to resize"></div>
+
+    <!-- Bottom: console panel -->
+    <section id="console-panel" class="panel" data-panel="console-panel">
+      <div class="panel-header">
+        <span>Console</span>
+        <button id="btn-clear-console" class="icon-btn" title="Clear console">&#10005;</button>
+      </div>
+      <div id="console-output" class="console-output">
+        <span class="console-placeholder">Console output will appear here.</span>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

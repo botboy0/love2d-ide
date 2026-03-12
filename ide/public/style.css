@@ -1,0 +1,526 @@
+/* ============================================================
+   Catppuccin Mocha (dark) palette
+   ============================================================ */
+[data-theme="dark"] {
+  --base:     #1e1e2e;
+  --mantle:   #181825;
+  --crust:    #11111b;
+  --surface0: #313244;
+  --surface1: #45475a;
+  --surface2: #585b70;
+  --overlay0: #6c7086;
+  --overlay1: #7f849c;
+  --overlay2: #9399b2;
+  --subtext0: #a6adc8;
+  --subtext1: #bac2de;
+  --text:     #cdd6f4;
+
+  --rosewater: #f5e0dc;
+  --flamingo:  #f2cdcd;
+  --pink:      #f5c2e7;
+  --mauve:     #cba6f7;
+  --red:       #f38ba8;
+  --maroon:    #eba0ac;
+  --peach:     #fab387;
+  --yellow:    #f9e2af;
+  --green:     #a6e3a1;
+  --teal:      #94e2d5;
+  --sky:       #89dceb;
+  --sapphire:  #74c7ec;
+  --blue:      #89b4fa;
+  --lavender:  #b4befe;
+
+  --accent: var(--mauve);
+  --bg-toolbar: var(--surface0);
+  --bg-sidebar: var(--mantle);
+  --bg-editor:  var(--base);
+  --bg-console: var(--crust);
+  --border:     var(--surface1);
+  --text-dim:   var(--overlay1);
+
+  color-scheme: dark;
+}
+
+/* ============================================================
+   Catppuccin Latte (light) palette
+   ============================================================ */
+[data-theme="light"] {
+  --base:     #eff1f5;
+  --mantle:   #e6e9ef;
+  --crust:    #dce0e8;
+  --surface0: #ccd0da;
+  --surface1: #bcc0cc;
+  --surface2: #acb0be;
+  --overlay0: #9ca0b0;
+  --overlay1: #8c8fa1;
+  --overlay2: #7c7f93;
+  --subtext0: #6c6f85;
+  --subtext1: #5c5f77;
+  --text:     #4c4f69;
+
+  --rosewater: #dc8a78;
+  --flamingo:  #dd7878;
+  --pink:      #ea76cb;
+  --mauve:     #8839ef;
+  --red:       #d20f39;
+  --maroon:    #e64553;
+  --peach:     #fe640b;
+  --yellow:    #df8e1d;
+  --green:     #40a02b;
+  --teal:      #179299;
+  --sky:       #04a5e5;
+  --sapphire:  #209fb5;
+  --blue:      #1e66f5;
+  --lavender:  #7287fd;
+
+  --accent: var(--mauve);
+  --bg-toolbar: var(--surface0);
+  --bg-sidebar: var(--mantle);
+  --bg-editor:  var(--base);
+  --bg-console: var(--crust);
+  --border:     var(--surface1);
+  --text-dim:   var(--overlay1);
+
+  color-scheme: light;
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  background: var(--base);
+  color: var(--text);
+}
+
+/* ============================================================
+   Toolbar
+   ============================================================ */
+#toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+
+#toolbar-left {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+}
+
+#project-name {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+}
+
+#toolbar-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+
+#toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+  justify-content: flex-end;
+}
+
+.toolbar-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+
+.toolbar-btn:hover {
+  opacity: 0.85;
+}
+
+.toolbar-btn:active {
+  transform: scale(0.96);
+}
+
+.btn-icon {
+  font-size: 11px;
+}
+
+.btn-run {
+  background: var(--green);
+  color: var(--crust);
+}
+
+.btn-stop {
+  background: var(--red);
+  color: var(--crust);
+}
+
+.btn-export {
+  background: var(--blue);
+  color: var(--crust);
+}
+
+.btn-theme {
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.status-msg {
+  font-size: 12px;
+  color: var(--green);
+  min-width: 60px;
+  text-align: right;
+  transition: opacity 0.3s;
+}
+
+/* ============================================================
+   Mobile tab bar
+   ============================================================ */
+#mobile-tabs {
+  display: none;
+  position: fixed;
+  top: 40px;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  height: 36px;
+  background: var(--bg-toolbar);
+  border-bottom: 1px solid var(--border);
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab-btn.active {
+  background: var(--accent);
+  color: var(--crust);
+  border-color: var(--accent);
+}
+
+/* ============================================================
+   IDE Layout — CSS Grid
+   ============================================================ */
+#ide-layout {
+  position: fixed;
+  top: 40px;   /* below toolbar */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: var(--sidebar-width, 250px) 4px 1fr;
+  grid-template-rows: 1fr 4px var(--console-height, 200px);
+  grid-template-areas:
+    "sidebar   v-handle  editor"
+    "sidebar   v-handle  h-handle"
+    "sidebar   v-handle  console";
+}
+
+/* ============================================================
+   Panels
+   ============================================================ */
+.panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-sidebar);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: var(--surface0);
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--subtext0);
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--overlay1);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 2px;
+  line-height: 1;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  background: var(--surface1);
+}
+
+/* ============================================================
+   Sidebar / File Tree
+   ============================================================ */
+#sidebar {
+  grid-area: sidebar;
+  border-right: 1px solid var(--border);
+}
+
+#file-tree {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0;
+}
+
+#file-tree::-webkit-scrollbar {
+  width: 6px;
+}
+
+#file-tree::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#file-tree::-webkit-scrollbar-thumb {
+  background: var(--surface1);
+  border-radius: 3px;
+}
+
+.tree-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 3px;
+  margin: 0 2px;
+  transition: background 0.1s;
+}
+
+.tree-item:hover {
+  background: var(--surface1);
+}
+
+.tree-item.active {
+  background: var(--surface0);
+  color: var(--accent);
+}
+
+.tree-item.directory {
+  font-weight: 500;
+  color: var(--subtext1);
+}
+
+.tree-item .tree-arrow {
+  display: inline-block;
+  width: 12px;
+  font-size: 10px;
+  color: var(--overlay0);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+
+.tree-item.open > .tree-arrow {
+  transform: rotate(90deg);
+}
+
+.tree-item .tree-icon {
+  flex-shrink: 0;
+  font-size: 12px;
+}
+
+.tree-children {
+  display: none;
+}
+
+.tree-children.open {
+  display: block;
+}
+
+/* ============================================================
+   Editor panel
+   ============================================================ */
+#editor-panel {
+  grid-area: editor;
+  background: var(--bg-editor);
+}
+
+#editor-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.dirty-indicator {
+  color: var(--peach);
+  font-size: 10px;
+}
+
+/* ============================================================
+   Resize handles
+   ============================================================ */
+.resize-handle {
+  background: var(--border);
+  z-index: 10;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.resize-handle:hover,
+.resize-handle.dragging {
+  background: var(--accent);
+}
+
+.resize-vertical {
+  grid-area: v-handle;
+  cursor: col-resize;
+  grid-row: 1 / 4;
+  width: 4px;
+}
+
+.resize-horizontal {
+  grid-area: h-handle;
+  cursor: row-resize;
+  height: 4px;
+}
+
+/* ============================================================
+   Console panel
+   ============================================================ */
+#console-panel {
+  grid-area: console;
+  background: var(--bg-console);
+  border-top: 1px solid var(--border);
+}
+
+.console-output {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 10px;
+  font-family: 'Cascadia Code', 'Fira Code', 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.console-output::-webkit-scrollbar {
+  width: 6px;
+}
+
+.console-output::-webkit-scrollbar-thumb {
+  background: var(--surface1);
+  border-radius: 3px;
+}
+
+.console-placeholder {
+  color: var(--overlay0);
+  font-style: italic;
+}
+
+.console-line {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.console-line.stderr {
+  color: var(--red);
+}
+
+.console-line.stdout {
+  color: var(--text);
+}
+
+/* ============================================================
+   Mobile responsive — 768px breakpoint
+   ============================================================ */
+@media (max-width: 768px) {
+  #mobile-tabs {
+    display: flex;
+  }
+
+  /* Layout shifts down to accommodate tab bar */
+  #ide-layout {
+    top: 76px; /* toolbar 40px + mobile tabs 36px */
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "panel";
+  }
+
+  /* All panels occupy the full area; show only the active one */
+  #sidebar,
+  #editor-panel,
+  #console-panel {
+    grid-area: panel;
+    display: none;
+  }
+
+  #sidebar.active-panel,
+  #editor-panel.active-panel,
+  #console-panel.active-panel {
+    display: flex;
+  }
+
+  /* Hide resize handles on mobile */
+  .resize-handle {
+    display: none;
+  }
+}
