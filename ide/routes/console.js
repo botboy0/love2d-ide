@@ -6,7 +6,24 @@
  * Exports: consoleStream (Express request handler)
  */
 
+import { Router } from 'express';
 import { consoleBus } from '../lib/console-bus.js';
+
+/**
+ * POST /api/console/log — Receive print output from Love2D via HTTP.
+ * Body: { stream: "stdout"|"stderr", text: "..." }
+ */
+export function consoleRouter() {
+  const router = Router();
+  router.post('/log', (req, res) => {
+    const { stream, text } = req.body || {};
+    if (text != null) {
+      consoleBus.emit('line', { stream: stream || 'stdout', text: String(text) });
+    }
+    res.json({ ok: true });
+  });
+  return router;
+}
 
 /**
  * SSE handler for /api/console/stream.

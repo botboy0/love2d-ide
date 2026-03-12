@@ -24,7 +24,8 @@ export function killCurrent() {
 
 /**
  * Launch Love2D with the given project path.
- * Kills any existing process first, then emits a clear event on the console bus.
+ * Uses lovec.exe (console variant) on Windows so stdout/stderr pipe correctly.
+ * love.exe is a GUI subsystem app that discards stdout even with t.console=true.
  *
  * @param {string} projectPath  - Windows path to the Love2D project directory
  * @param {string} loveExePath  - Windows path to love.exe
@@ -35,7 +36,10 @@ export function launch(projectPath, loveExePath) {
   // Clear console output on each new run
   consoleBus.emit('clear');
 
-  const child = spawn(loveExePath, [projectPath], {
+  // Use lovec.exe (console variant) for stdout/stderr piping
+  const consolePath = loveExePath.replace(/love\.exe$/i, 'lovec.exe');
+
+  const child = spawn(consolePath, [projectPath], {
     shell: false,
     windowsHide: false,
   });
@@ -44,6 +48,7 @@ export function launch(projectPath, loveExePath) {
 
   child.stdout.on('data', (data) => {
     const text = data.toString();
+    console.log('[IDE stdout]', JSON.stringify(text));
     for (const line of text.split('\n')) {
       if (line.trim() !== '') {
         consoleBus.emit('line', { stream: 'stdout', text: line });
@@ -53,6 +58,7 @@ export function launch(projectPath, loveExePath) {
 
   child.stderr.on('data', (data) => {
     const text = data.toString();
+    console.log('[IDE stderr]', JSON.stringify(text));
     for (const line of text.split('\n')) {
       if (line.trim() !== '') {
         consoleBus.emit('line', { stream: 'stderr', text: line });

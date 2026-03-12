@@ -3,7 +3,7 @@ import { readdirSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'f
 import { join, resolve, relative, normalize } from 'path';
 
 const SKIP_NAMES = new Set([
-  'node_modules', '.git', '.DS_Store', 'Thumbs.db',
+  'node_modules', '.git', '.DS_Store', 'Thumbs.db', '.ide-console.log',
 ]);
 
 function isHidden(name) {

@@ -1,5 +1,7 @@
 -- conf.lua
 -- CS50G defaults: 1280x720 virtual resolution, vsync enabled
+io.stdout:setvbuf("no")
+io.stderr:setvbuf("no")
 function love.conf(t)
     t.window.title    = "Pong"
     t.window.width    = 1280

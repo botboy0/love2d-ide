@@ -303,7 +303,8 @@ const themeIcon = document.getElementById('theme-icon');
 
 function applyTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
-  themeIcon.innerHTML = mode === 'dark' ? '&#9790;' : '&#9788;';
+  const icon = document.getElementById('theme-icon');
+  if (icon) icon.innerHTML = mode === 'dark' ? '&#9790;' : '&#9788;';
 }
 
 btnTheme.addEventListener('click', () => {
