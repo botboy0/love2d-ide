@@ -45,7 +45,7 @@ Plans:
   2. Pong runs from `projects/01-pong/` with ball physics, paddle input, collision detection, and score display
   3. AI-controlled paddle mode is implemented and the game is completable against the AI
   4. Standard project template (`main.lua`, `conf.lua`, `lib/`, `assets/`, `src/`) is established and documented
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 02-01-PLAN.md — Set up project directory from template, copy assets/libraries, initialize DEVLOG.md, create pong-0 baseline
@@ -93,6 +93,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Environment | 3/3 | Complete   | 2026-03-12 |
-| 2. Pong | 0/3 | Not started | - |
+| 2. Pong | 1/3 | In Progress|  |
 | 3. IDE Shell | 0/4 | Not started | - |
 | 4. Preview and Deploy | 0/2 | Not started | - |

@@ -19,11 +19,11 @@ Requirements for initial release (Pong + IDE v0.1). Each maps to roadmap phases.
 
 ### Pong Game
 
-- [ ] **PONG-01**: CS50G Pong lecture code studied and understood
-- [ ] **PONG-02**: Pong rebuilt from scratch in `projects/01-pong/` (not forked)
+- [x] **PONG-01**: CS50G Pong lecture code studied and understood
+- [x] **PONG-02**: Pong rebuilt from scratch in `projects/01-pong/` (not forked)
 - [ ] **PONG-03**: Game loop, input handling, collision detection, and scoring implemented
 - [ ] **PONG-04**: CS50G "Pong — the AI Update" assignment completed (AI-controlled paddle)
-- [ ] **PONG-05**: Standard project template established (`main.lua`, `conf.lua`, `lib/`, `assets/`, `src/`)
+- [x] **PONG-05**: Standard project template established (`main.lua`, `conf.lua`, `lib/`, `assets/`, `src/`)
 
 ### IDE Shell
 
@@ -115,11 +115,11 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 | ENV-05 | Phase 1 | Complete |
 | ENV-06 | Phase 1 | Complete |
 | ENV-07 | Phase 1 | Complete |
-| PONG-01 | Phase 2 | Pending |
-| PONG-02 | Phase 2 | Pending |
+| PONG-01 | Phase 2 | Complete |
+| PONG-02 | Phase 2 | Complete |
 | PONG-03 | Phase 2 | Pending |
 | PONG-04 | Phase 2 | Pending |
-| PONG-05 | Phase 2 | Pending |
+| PONG-05 | Phase 2 | Complete |
 | IDE-01 | Phase 3 | Pending |
 | IDE-02 | Phase 3 | Pending |
 | IDE-03 | Phase 3 | Pending |

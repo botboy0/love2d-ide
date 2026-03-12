@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-12T02:52:43.605Z"
-last_activity: 2026-03-12 — Plan 01-03 complete, Android deployment chain proven (ADB + Android 15 content URI method)
+status: in_progress
+stopped_at: "Completed 02-01-PLAN.md"
+last_updated: "2026-03-12T00:00:00.000Z"
+last_activity: 2026-03-12 — Plan 02-01 complete, pong scaffold verified on Android (push.lua dropped for native rendering)
 progress:
   total_phases: 4
   completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 10
+  total_plans: 4
+  completed_plans: 4
+  percent: 20
 ---
 
 # Project State
@@ -25,29 +25,30 @@ See: .planning/PROJECT.md (updated 2026-03-12)
 
 ## Current Position
 
-Phase: 1 of 4 (Environment) — COMPLETE
-Plan: 3 of 3 in phase 1 — all done; next: Phase 2
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-03-12 — Plan 01-03 complete, Android deployment chain proven (ADB + Android 15 content URI method)
+Phase: 2 of 4 (Pong) — IN PROGRESS
+Plan: 1 of ? in phase 2 — 02-01 done; next: 02-02
+Status: Phase 2 underway, scaffold complete
+Last activity: 2026-03-12 — Plan 02-01 complete, pong scaffold verified on Android (push.lua dropped for native rendering)
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~12 min
-- Total execution time: ~36 min
+- Total plans completed: 4
+- Average duration: ~13 min
+- Total execution time: ~51 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-environment | 3/3 | ~36 min | ~12 min |
+| 02-pong | 1/? | ~15 min | ~15 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~3 min), 01-02 (~3 min), 01-03 (~30 min)
-- Trend: 01-03 longer due to Android 15 scoped storage debugging
+- Last 5 plans: 01-01 (~3 min), 01-02 (~3 min), 01-03 (~30 min), 02-01 (~15 min)
+- Trend: 02-01 required Android compatibility fix during verification checkpoint
 
 *Updated after each plan completion*
 
@@ -71,6 +72,8 @@ Recent decisions affecting current work:
 - [01-03]: Android 15 scoped storage — file:// URI intent launch silently fails; must use MediaStore content URI
 - [01-03]: Android 15 deploy method: push to /sdcard/lovegame/, query MediaStore _id, launch via content://media/external/file/{id} with --grant-read-uri-permission
 - [01-03]: Wireless debugging at 192.168.178.79:34779; LOVE Loader app confirmed working on device
+- [02-01]: push.lua incompatible with Android LOVE — causes black screen; use love.graphics.getWidth/getHeight for native rendering
+- [02-01]: Font size 24pt for mobile readability (CS50G uses 8pt on virtual 1280x720 canvas via push.lua)
 
 ### Pending Todos
 
@@ -83,6 +86,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T02:52:43.589Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-pong/02-CONTEXT.md
+Last session: 2026-03-12T00:00:00.000Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-pong/02-01-SUMMARY.md
