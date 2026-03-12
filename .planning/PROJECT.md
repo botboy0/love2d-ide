@@ -18,7 +18,7 @@ The IDE must make Love2D game development faster and more visual than a text edi
 
 ### Active
 
-- [ ] WSL environment fully configured (Love2D 11.5, Lua 5.1/LuaJIT, ADB)
+- [ ] Windows environment fully configured (Love2D 11.5 native, Lua 5.1/LuaJIT, ADB)
 - [ ] CS50G reference repos cloned and accessible
 - [ ] Pong built from scratch (study lecture code, rebuild independently)
 - [ ] CS50G "Pong — the AI Update" assignment completed
@@ -36,11 +36,11 @@ The IDE must make Love2D game development faster and more visual than a text edi
 
 ## Context
 
-- Running on WSL2 (Ubuntu) with Windows host
+- **Windows-only runtime** — Love2D, Electron, and all apps run natively on Windows. WSL2 is used only for CLI tooling (Claude Code, git, etc.)
 - GSD workflow controller already operational
 - Node.js 20 already installed
 - CS50G course uses Love2D 0.10.x; some libraries need compatibility patches for 11.x (notably push.lua)
-- ADB in WSL requires either Windows ADB alias or usbipd-win for USB passthrough
+- ADB uses Windows platform-tools, accessed from WSL via alias to adb.exe
 - Long-term vision: personal tool evolving into open-source product for Love2D community
 - 8 CS50G Love2D projects total, each feeding an IDE iteration
 
@@ -60,7 +60,7 @@ The IDE must make Love2D game development faster and more visual than a text edi
 ## Constraints
 
 - **Tech stack**: Love2D 11.5 + Lua 5.1/LuaJIT for games, Electron + Node.js for IDE
-- **Platform**: WSL2 primary dev environment, Android for game testing
+- **Platform**: Windows-native for all runtime (Love2D, Electron, ADB); Android for game testing; WSL2 for CLI only
 - **Compatibility**: CS50G code targets Love2D 0.10.x — must patch where needed
 - **Learning-first**: Each game must be studied and rebuilt from scratch, not just forked
 
@@ -72,6 +72,8 @@ The IDE must make Love2D game development faster and more visual than a text edi
 | Study + rebuild (not fork) | Deeper learning, own code from day one | — Pending |
 | ADB in v1 | Test on real device from the start | — Pending |
 | Electron for IDE shell | Cross-platform, Node.js ecosystem, familiar | — Pending |
+| Windows-only runtime | Love2D, Electron, ADB all run on Windows natively; WSL is CLI only | — Active |
+| Android for testing | Game testing on real device via ADB push of .love files | — Active |
 
 ---
 *Last updated: 2026-03-12 after initialization*

@@ -18,20 +18,20 @@
 
 ---
 
-## P2: WSL2 Display/Audio Limitations
+## P2: Windows Love2D Installation/PATH
 
-**Risk:** Love2D needs a display server (X11/Wayland) and audio in WSL2. Without proper setup, `love` command fails silently or crashes.
+**Risk:** Love2D runs natively on Windows (not in WSL). If love.exe isn't on PATH or the wrong version is installed, nothing works.
 
 **Warning signs:**
-- `Could not initialize display` errors
-- No window appears when running `love .`
-- Audio playback fails or causes crashes
+- `love` not recognized in cmd/PowerShell
+- Wrong Love2D version (not 11.5.x)
+- WSL alias to love.exe not set up or pointing to wrong path
 
 **Prevention:**
-- Install WSLg (Windows 11 includes it by default) or an X server (VcXsrv/X410)
-- Set `DISPLAY` environment variable if needed
-- Test `love --version` AND `love .` with a simple test project early
-- For audio: WSLg handles PulseAudio. Older WSL may need explicit PulseAudio setup
+- Install Love2D 11.5 on Windows and add to system PATH
+- Create WSL alias/wrapper to call Windows love.exe for CLI convenience
+- Test `love.exe --version` on Windows AND via WSL alias with a simple test project
+- No WSLg dependency — display and audio are handled natively by Windows
 
 **Phase:** Environment setup (Phase 1)
 

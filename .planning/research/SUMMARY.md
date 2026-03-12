@@ -11,7 +11,7 @@ This project is a purpose-built IDE for Love2D game development, structured arou
 
 The recommended approach is an Electron shell with a single BrowserWindow, CodeMirror 6 for code editing, chokidar for file watching, and Love2D launched as a child process via `child_process.spawn`. This stack is lightweight, well-documented, and maps directly to the required features. The learning path and IDE build path are tightly coupled: each CS50G game reveals what tooling is actually painful, and the IDE is extended to address that pain. This means the roadmap must interleave game completion with IDE feature work — not build the IDE first, then do games.
 
-The primary risks are environmental (WSL2 display/audio setup, ADB for Android) and architectural discipline (not letting the project drift into building a game engine or framework). Both are avoidable with upfront setup verification and a strict rule: IDE code lives in `ide/` (JavaScript), game code lives in `projects/` (Lua). Scope creep toward visual editors before the corresponding game is completed is the most likely failure mode in later phases.
+The primary risks are environmental (Windows Love2D setup, ADB for Android) and architectural discipline (not letting the project drift into building a game engine or framework). Both are avoidable with upfront setup verification and a strict rule: IDE code lives in `ide/` (JavaScript), game code lives in `projects/` (Lua). Scope creep toward visual editors before the corresponding game is completed is the most likely failure mode in later phases.
 
 ## Key Findings
 
@@ -70,7 +70,7 @@ The architecture is a three-layer system: Electron main process (file I/O, proce
 ### Critical Pitfalls
 
 1. **Love2D version incompatibility (CS50G)** — Update push.lua from Ulydev/push master in every project; test immediately after cloning. This affects Phase 1 setup.
-2. **WSL2 display/audio not configured** — Verify WSLg is installed and `love .` launches a window before any IDE work begins. Silent failures here waste hours.
+2. **Windows Love2D not on PATH** — Verify love.exe is installed on Windows and callable. Create WSL alias for CLI convenience. No WSLg dependency — everything runs Windows-native.
 3. **Zombie Love2D processes** — Use `tree-kill` or `process.kill(-pid)` on reload/quit; handle Electron `will-quit` to clean up all children. Detached: false only.
 4. **chokidar event storms on WSL2** — Debounce 300-500ms, filter to Lua files only, use polling mode for `/mnt/c/...` paths where inotify doesn't cross the 9P boundary.
 5. **Scope creep into game engine territory** — If a feature could be a standalone Lua library, it is not an IDE feature. Every IDE iteration must produce developer-facing UI, not runtime abstractions.
@@ -81,9 +81,9 @@ The architecture is a three-layer system: Electron main process (file I/O, proce
 Based on combined research, the roadmap must strictly interleave game completion with IDE feature development. The suggested structure is eight paired phases (game + IDE feature), preceded by an environment setup phase.
 
 ### Phase 1: Environment and Foundation
-**Rationale:** Nothing else works without a verified Love2D + WSL2 + display setup. This is the highest-risk phase for invisible failures.
-**Delivers:** Working Love2D installation, push.lua compatibility fix verified, WSLg/display confirmed, project template established
-**Addresses:** P1 (version compat), P2 (WSL2 display), P9 (project structure drift)
+**Rationale:** Nothing else works without a verified Windows-native Love2D setup. This is the highest-risk phase for invisible failures.
+**Delivers:** Working Windows-native Love2D installation, push.lua compatibility fix verified, display/audio confirmed, project template established
+**Addresses:** P1 (version compat), P9 (project structure drift)
 **Avoids:** Discovering environment issues mid-game-build
 
 ### Phase 2: Pong + IDE Shell
@@ -139,7 +139,7 @@ Based on combined research, the roadmap must strictly interleave game completion
 
 ### Phase Ordering Rationale
 
-- Environment must come first — silent failures in WSL2 setup derail everything downstream
+- Environment must come first — silent failures in Windows/Love2D setup derail everything downstream
 - Game phases strictly precede their corresponding IDE visual editor features (P7 pitfall prevention)
 - Live reload (Phase 3) is front-loaded because it has the highest daily-use ROI
 - Android deployment (Phase 5) is placed at Match-3 because that's the first "showable" game
@@ -166,7 +166,7 @@ Phases with standard, well-documented patterns (skip research-phase):
 | Stack | HIGH | Core technologies (Electron, CodeMirror 6, chokidar, Love2D 11.5) are well-established; version choices are specific and justified |
 | Features | HIGH | Feature dependency chain is logical; complexity ratings are realistic; anti-features list prevents scope creep |
 | Architecture | HIGH | Three-layer architecture is clean and proven; IPC pattern (contextBridge) is the current Electron best practice |
-| Pitfalls | HIGH | WSL2-specific pitfalls (display, ADB, chokidar polling) are specific and actionable; CS50G compatibility issue is precisely identified |
+| Pitfalls | HIGH | Platform-specific pitfalls (Windows Love2D paths, ADB, chokidar polling on WSL2 mounts) are specific and actionable; CS50G compatibility issue is precisely identified |
 
 **Overall confidence:** HIGH
 
