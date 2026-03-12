@@ -45,12 +45,12 @@ Plans:
   2. Pong runs from `projects/01-pong/` with ball physics, paddle input, collision detection, and score display
   3. AI-controlled paddle mode is implemented and the game is completable against the AI
   4. Standard project template (`main.lua`, `conf.lua`, `lib/`, `assets/`, `src/`) is established and documented
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 02-01: Study CS50G Pong lecture code and document understanding of core concepts
-- [ ] 02-02: Rebuild Pong from scratch in `projects/01-pong/` with game loop, input, collision, and scoring
-- [ ] 02-03: Complete the AI paddle assignment and finalize the standard project template
+- [ ] 02-01-PLAN.md — Set up project directory from template, copy assets/libraries, initialize DEVLOG.md, create pong-0 baseline
+- [ ] 02-02-PLAN.md — Incremental Pong rebuild through all 13 CS50G versions (user-driven, Claude assists)
+- [ ] 02-03-PLAN.md — Complete AI paddle assignment and finalize standard project template
 
 ### Phase 3: IDE Shell
 **Goal**: A working Electron IDE where a developer can browse project files, edit Lua code with syntax highlighting, run a Love2D game, see console output, and benefit from automatic live reload on save
