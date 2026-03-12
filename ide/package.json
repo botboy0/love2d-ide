@@ -1,0 +1,23 @@
+{
+  "name": "love2d-ide",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Web-based IDE for Love2D game development",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node build/build.mjs"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "chokidar": "^3.6.0",
+    "express": "^4.22.1",
+    "ignore": "^6.0.2",
+    "ws": "^8.19.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.12",
+    "monaco-editor": "^0.52.2",
+    "monaco-languageclient": "^9.11.0",
+    "vscode-ws-jsonrpc": "^3.5.0"
+  }
+}
