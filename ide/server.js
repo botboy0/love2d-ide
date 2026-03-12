@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
@@ -7,6 +8,8 @@ import { filesRouter } from './routes/files.js';
 import { runRouter } from './routes/run.js';
 import { consoleStream } from './routes/console.js';
 import { startWatcher } from './lib/watcher.js';
+import { exportRouter } from './routes/export.js';
+import { attachLspProxy } from './routes/lsp.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,6 +35,9 @@ app.use('/api/files', filesRouter(config));
 
 // Mount run/stop API
 app.use('/api/run', runRouter(config));
+
+// Mount export API
+app.use('/api/export', exportRouter);
 
 // Console SSE stream
 app.get('/api/console/stream', consoleStream);
@@ -59,7 +65,10 @@ function getLocalIP() {
   return 'localhost';
 }
 
-const server = app.listen(port, '0.0.0.0', () => {
+// Create HTTP server explicitly so WebSocket can attach to it
+const httpServer = http.createServer(app);
+
+httpServer.listen(port, '0.0.0.0', () => {
   const localIP = getLocalIP();
   console.log(`Love2D IDE started`);
   console.log(`  Local:   http://localhost:${port}`);
@@ -69,6 +78,12 @@ const server = app.listen(port, '0.0.0.0', () => {
   // Start file watcher for live reload
   startWatcher(config.projectPath, config.lovePath);
   console.log(`  Watcher: watching ${config.projectPath}`);
+
+  // Attach Lua LSP WebSocket proxy (no-op if lsPath is not set)
+  attachLspProxy(httpServer, config.lsPath);
+  if (config.lsPath) {
+    console.log(`  LSP:     lua-language-server at ${config.lsPath}`);
+  }
 });
 
-export default server;
+export default httpServer;

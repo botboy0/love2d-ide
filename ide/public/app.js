@@ -479,8 +479,7 @@ document.getElementById('btn-stop').addEventListener('click', async () => {
 });
 
 document.getElementById('btn-export').addEventListener('click', () => {
-  console.log('TODO: wire Export in Plan 03');
-  showStatus('Export: coming in Plan 03', 'ok');
+  window.location.href = '/api/export';
 });
 
 // ---------------------------------------------------------------------------
