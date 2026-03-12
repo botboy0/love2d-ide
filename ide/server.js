@@ -1,10 +1,12 @@
 import express from 'express';
-import { createRequire } from 'module';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
 import os from 'os';
 import { filesRouter } from './routes/files.js';
+import { runRouter } from './routes/run.js';
+import { consoleStream } from './routes/console.js';
+import { startWatcher } from './lib/watcher.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +18,9 @@ const config = JSON.parse(readFileSync(configPath, 'utf8'));
 const app = express();
 const port = config.port || 3000;
 
+// Expose config to routes via app.locals
+app.locals.config = config;
+
 // Serve static files from public/
 app.use(express.static(join(__dirname, 'public')));
 
@@ -24,6 +29,12 @@ app.use(express.text({ type: 'text/plain', limit: '10mb' }));
 
 // Mount file API
 app.use('/api/files', filesRouter(config));
+
+// Mount run/stop API
+app.use('/api/run', runRouter(config));
+
+// Console SSE stream
+app.get('/api/console/stream', consoleStream);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -54,6 +65,10 @@ const server = app.listen(port, '0.0.0.0', () => {
   console.log(`  Local:   http://localhost:${port}`);
   console.log(`  Network: http://${localIP}:${port}`);
   console.log(`  Project: ${config.projectPath}`);
+
+  // Start file watcher for live reload
+  startWatcher(config.projectPath, config.lovePath);
+  console.log(`  Watcher: watching ${config.projectPath}`);
 });
 
 export default server;
