@@ -132,15 +132,15 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 | BRW-01 | Phase 4 | Pending |
 | BRW-02 | Phase 4 | Pending |
 | BRW-03 | Phase 4 | Pending |
-| ADB-01 | Phase 5 | Pending |
-| ADB-02 | Phase 5 | Pending |
-| ADB-03 | Phase 5 | Pending |
+| ADB-01 | Phase 4 | Pending |
+| ADB-02 | Phase 4 | Pending |
+| ADB-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
 - Mapped to phases: 25
-- Unmapped: 0 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-12*
-*Last updated: 2026-03-12 after initial definition*
+*Last updated: 2026-03-12 — Phase mapping updated to 4-phase structure (BRW + ADB merged into Phase 4)*
