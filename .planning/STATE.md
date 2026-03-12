@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 03-02-PLAN.md
-last_updated: "2026-03-12T04:40:04.302Z"
+stopped_at: Checkpoint 03-03 Task 3 — awaiting human verification of full IDE
+last_updated: "2026-03-12T04:48:58.132Z"
 last_activity: 2026-03-12 — Plan 02-01 complete, pong scaffold verified on Android (push.lua dropped for native rendering)
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 7
   percent: 20
 ---
 
@@ -53,6 +53,7 @@ Progress: [██░░░░░░░░] 20%
 *Updated after each plan completion*
 | Phase 03-web-ide P01 | 7 | 3 tasks | 11 files |
 | Phase 03-web-ide P02 | 2 | 2 tasks | 7 files |
+| Phase 03-web-ide P03 | 7 | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,9 @@ Recent decisions affecting current work:
 - [Phase 03-web-ide]: express.text() middleware required for PUT file save (plain text bodies)
 - [Phase 03-web-ide]: spawn(loveExePath, [projectPath], { shell: false, windowsHide: false }) — Love2D window appears on Windows host
 - [Phase 03-web-ide]: Named SSE listener functions required for consoleBus.off() cleanup — arrow functions cannot be dereferenced
+- [Phase 03-web-ide]: esbuild assetNames changed to [name]-[hash] to resolve codicon.ttf conflict between monaco-editor and @codingame/monaco-vscode-api
+- [Phase 03-web-ide]: MonacoLanguageClient uses inline numeric error/close action values to avoid CJS/ESM import issues in browser bundle
+- [Phase 03-web-ide]: vscode-ws-jsonrpc forward() bridges LSP WebSocket to lua-language-server stdio; lsPath empty means LSP gracefully disabled
 
 ### Pending Todos
 
@@ -93,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-12T04:40:04.288Z
-Stopped at: Completed 03-02-PLAN.md
+Last session: 2026-03-12T04:48:58.118Z
+Stopped at: Checkpoint 03-03 Task 3 — awaiting human verification of full IDE
 Resume file: None
