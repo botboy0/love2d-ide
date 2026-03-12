@@ -2,7 +2,7 @@
 
 ## Overview
 
-This milestone ships the foundation: a verified Love2D development environment, a complete Pong game built from scratch, an Electron-based IDE shell that can run and edit Love2D projects with live reload, and deployment paths to both the browser (love.js) and Android (ADB). Each phase delivers a coherent, verifiable capability — nothing is left half-done at a phase boundary.
+This milestone ships the foundation: a verified Love2D development environment, a web-based IDE accessible over local WiFi, a complete Pong game built from scratch using that IDE, and deployment paths to both the browser (love.js) and Android (ADB). Each phase delivers a coherent, verifiable capability — nothing is left half-done at a phase boundary.
 
 ## Phases
 
@@ -13,9 +13,10 @@ This milestone ships the foundation: a verified Love2D development environment, 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Environment** - Windows-native Love2D 11.5, display/audio, workspace, and ADB fully verified and ready (completed 2026-03-12)
-- [ ] **Phase 2: Pong** - Complete Pong game rebuilt from scratch including AI paddle assignment
-- [ ] **Phase 3: IDE Shell** - Electron app with file tree, Lua editor, run button, console, live reload, and .love export
-- [ ] **Phase 4: Preview and Deploy** - Browser preview via love.js and one-click Android deployment via ADB
+- [x] **Phase 2: Pong Scaffold** - Project directory, assets, and pong-0 baseline verified (completed 2026-03-12)
+- [ ] **Phase 3: Web IDE** - Node.js web server with file tree, CodeMirror Lua editor, run button, console, live reload, and .love export — accessible over local WiFi from any browser
+- [ ] **Phase 4: Pong Rebuild** - Complete Pong game rebuilt from scratch using the Web IDE, including AI paddle assignment
+- [ ] **Phase 5: Preview and Deploy** - Browser preview via love.js and one-click Android deployment via ADB
 
 ## Phase Details
 
@@ -36,42 +37,44 @@ Plans:
 - [x] 01-02-PLAN.md — Clone CS50G repos, create workspace structure, build project template with patched push.lua
 - [ ] 01-03-PLAN.md — Configure Windows ADB with WSL alias, end-to-end Android deployment test
 
-### Phase 2: Pong
-**Goal**: A complete, independently-written Pong game exists with working AI paddle, establishing the project template all future games will follow
+### Phase 2: Pong Scaffold
+**Goal**: Project directory with assets, libraries, and a verified pong-0 baseline ready for the incremental rebuild
 **Depends on**: Phase 1
-**Requirements**: PONG-01, PONG-02, PONG-03, PONG-04, PONG-05
+**Requirements**: PONG-01, PONG-02, PONG-05
 **Success Criteria** (what must be TRUE):
-  1. CS50G Pong lecture code has been studied and can be explained (game loop, collision, state management)
-  2. Pong runs from `projects/01-pong/` with ball physics, paddle input, collision detection, and score display
-  3. AI-controlled paddle mode is implemented and the game is completable against the AI
-  4. Standard project template (`main.lua`, `conf.lua`, `lib/`, `assets/`, `src/`) is established and documented
-**Plans:** 1/3 plans executed
+  1. CS50G Pong lecture code has been studied
+  2. `projects/01-pong/` exists with assets, libraries, conf.lua, and a working pong-0 main.lua
+  3. Standard project template (`main.lua`, `conf.lua`, `lib/`, `assets/`, `src/`) is established
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 02-01-PLAN.md — Set up project directory from template, copy assets/libraries, initialize DEVLOG.md, create pong-0 baseline
-- [ ] 02-02-PLAN.md — Incremental Pong rebuild through all 13 CS50G versions (user-driven, Claude assists)
-- [ ] 02-03-PLAN.md — Complete AI paddle assignment and finalize standard project template
+- [x] 02-01-PLAN.md — Set up project directory from template, copy assets/libraries, initialize DEVLOG.md, create pong-0 baseline
 
-### Phase 3: IDE Shell
-**Goal**: A working Electron IDE where a developer can browse project files, edit Lua code with syntax highlighting, run a Love2D game, see console output, and benefit from automatic live reload on save
-**Depends on**: Phase 2
+### Phase 3: Web IDE
+**Goal**: A web-based IDE accessible over local WiFi where a developer can browse project files, edit Lua code with syntax highlighting, run a Love2D game, see console output, and benefit from automatic live reload on save
+**Depends on**: Phase 1
 **Requirements**: IDE-01, IDE-02, IDE-03, IDE-04, IDE-05, IDE-06, IDE-07, IDE-08, IDE-09
 **Success Criteria** (what must be TRUE):
-  1. Electron app launches with sidebar, main editor, and bottom console panel visible in a single window
-  2. Developer can open any file from the file tree into the CodeMirror editor with Lua syntax highlighting
-  3. Clicking Run launches the Love2D game and its stdout/stderr output appears in the console panel in real time
-  4. Saving a Lua file causes the game to automatically restart within one second (live reload)
-  5. When Love2D reports an error, the IDE displays the file name and line number; developer can click it to navigate there
-  6. Developer can export the current project as a `.love` file from inside the IDE
+  1. Node.js server launches and is accessible from any device on the local network (binds 0.0.0.0)
+  2. Web UI has sidebar file tree, main CodeMirror editor, and bottom console panel
+  3. Developer can open any file from the file tree into the CodeMirror editor with Lua syntax highlighting
+  4. Clicking Run spawns the Love2D process on the host and stdout/stderr appears in the console panel in real time
+  5. Saving a Lua file causes the game to automatically restart within one second (live reload)
+  6. When Love2D reports an error, the IDE displays the file name and line number; developer can click it to navigate there
+  7. Developer can export the current project as a `.love` file from the IDE
 **Plans**: TBD
 
-Plans:
-- [ ] 03-01: Scaffold Electron app with single-window layout, contextBridge IPC, file tree panel, and project open/navigate
-- [ ] 03-02: Integrate CodeMirror 6 Lua editor and wire file-open from tree into editor
-- [ ] 03-03: Implement Love2D child process (spawn/kill), console output capture, error parsing, and live reload via chokidar
-- [ ] 03-04: Add .love export (zip packaging) and end-to-end IDE integration test with Pong
+### Phase 4: Pong Rebuild
+**Goal**: A complete, independently-written Pong game with working AI paddle, built using the Web IDE
+**Depends on**: Phase 2, Phase 3
+**Requirements**: PONG-03, PONG-04
+**Success Criteria** (what must be TRUE):
+  1. Pong runs from `projects/01-pong/` with ball physics, paddle input, collision detection, and score display
+  2. AI-controlled paddle mode is implemented and the game is completable against the AI
+  3. DEVLOG.md captures the rebuild experience
+**Plans**: TBD
 
-### Phase 4: Preview and Deploy
+### Phase 5: Preview and Deploy
 **Goal**: Developer can preview the game in-browser without leaving the IDE and deploy it to an Android device with a single click
 **Depends on**: Phase 3
 **Requirements**: BRW-01, BRW-02, BRW-03, ADB-01, ADB-02, ADB-03
@@ -81,18 +84,15 @@ Plans:
   3. Developer can package, push, and launch the game on a connected Android phone using a single Deploy button in the IDE
 **Plans**: TBD
 
-Plans:
-- [ ] 04-01: Integrate love.js and wire browser preview panel with both native and browser run options
-- [ ] 04-02: Implement ADB deploy flow (package .love, adb push, adb shell am start) with one-click button in IDE
-
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Environment | 3/3 | Complete   | 2026-03-12 |
-| 2. Pong | 1/3 | In Progress|  |
-| 3. IDE Shell | 0/4 | Not started | - |
-| 4. Preview and Deploy | 0/2 | Not started | - |
+| 1. Environment | 3/3 | Complete | 2026-03-12 |
+| 2. Pong Scaffold | 1/1 | Complete | 2026-03-12 |
+| 3. Web IDE | 0/? | Not started | - |
+| 4. Pong Rebuild | 0/? | Not started | - |
+| 5. Preview and Deploy | 0/? | Not started | - |

@@ -27,11 +27,11 @@ Requirements for initial release (Pong + IDE v0.1). Each maps to roadmap phases.
 
 ### IDE Shell
 
-- [ ] **IDE-01**: Electron app launches with single-window layout (sidebar + main + bottom panels)
+- [ ] **IDE-01**: Web IDE launches and is accessible over local WiFi from any browser (single-window layout: sidebar + main + bottom panels)
 - [ ] **IDE-02**: File tree panel displays project directory structure with expand/collapse
 - [ ] **IDE-03**: User can open files from file tree into code editor
 - [ ] **IDE-04**: Code editor panel with Lua syntax highlighting (CodeMirror 6)
-- [ ] **IDE-05**: User can run Love2D game from IDE (spawns native Love2D child process)
+- [ ] **IDE-05**: User can run Love2D game from IDE (server spawns native Love2D child process on host)
 - [ ] **IDE-06**: Console panel captures and displays Love2D stdout/stderr output
 - [ ] **IDE-07**: Live reload: game auto-restarts when Lua files are saved (debounced)
 - [ ] **IDE-08**: Error display: Love2D errors parsed and shown with file:line reference
@@ -101,7 +101,7 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 | 3D support | Love2D is 2D only |
 | Multiplayer/networking | CS50G doesn't cover it; out of scope |
 | Asset store / marketplace | Community feature, not IDE core |
-| Mobile-responsive IDE | Desktop-only tool |
+| Native desktop app wrapper | Web-based IDE is sufficient; Electron adds complexity without benefit |
 | Built-in game engine runtime | Love2D IS the runtime; don't rewrite it |
 
 ## Traceability
@@ -117,8 +117,8 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 | ENV-07 | Phase 1 | Complete |
 | PONG-01 | Phase 2 | Complete |
 | PONG-02 | Phase 2 | Complete |
-| PONG-03 | Phase 2 | Pending |
-| PONG-04 | Phase 2 | Pending |
+| PONG-03 | Phase 4 | Pending |
+| PONG-04 | Phase 4 | Pending |
 | PONG-05 | Phase 2 | Complete |
 | IDE-01 | Phase 3 | Pending |
 | IDE-02 | Phase 3 | Pending |
@@ -129,12 +129,12 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 | IDE-07 | Phase 3 | Pending |
 | IDE-08 | Phase 3 | Pending |
 | IDE-09 | Phase 3 | Pending |
-| BRW-01 | Phase 4 | Pending |
-| BRW-02 | Phase 4 | Pending |
-| BRW-03 | Phase 4 | Pending |
-| ADB-01 | Phase 4 | Pending |
-| ADB-02 | Phase 4 | Pending |
-| ADB-03 | Phase 4 | Pending |
+| BRW-01 | Phase 5 | Pending |
+| BRW-02 | Phase 5 | Pending |
+| BRW-03 | Phase 5 | Pending |
+| ADB-01 | Phase 5 | Pending |
+| ADB-02 | Phase 5 | Pending |
+| ADB-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 25 total
