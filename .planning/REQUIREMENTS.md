@@ -31,10 +31,10 @@ Requirements for initial release (Pong + IDE v0.1). Each maps to roadmap phases.
 - [x] **IDE-02**: File tree panel displays project directory structure with expand/collapse
 - [x] **IDE-03**: User can open files from file tree into code editor
 - [x] **IDE-04**: Code editor panel with Lua syntax highlighting (Monaco Editor)
-- [ ] **IDE-05**: User can run Love2D game from IDE (server spawns native Love2D child process on host)
-- [ ] **IDE-06**: Console panel captures and displays Love2D stdout/stderr output
-- [ ] **IDE-07**: Live reload: game auto-restarts when Lua files are saved (debounced)
-- [ ] **IDE-08**: Error display: Love2D errors parsed and shown with file:line reference
+- [x] **IDE-05**: User can run Love2D game from IDE (server spawns native Love2D child process on host)
+- [x] **IDE-06**: Console panel captures and displays Love2D stdout/stderr output
+- [x] **IDE-07**: Live reload: game auto-restarts when Lua files are saved (debounced)
+- [x] **IDE-08**: Error display: Love2D errors parsed and shown with file:line reference
 - [ ] **IDE-09**: User can export (download/package) project as .love file from IDE
 
 ### Browser Preview
@@ -124,10 +124,10 @@ Deferred to future milestones. Each unlocked by a CS50G game project.
 | IDE-02 | Phase 3 | Complete |
 | IDE-03 | Phase 3 | Complete |
 | IDE-04 | Phase 3 | Complete |
-| IDE-05 | Phase 3 | Pending |
-| IDE-06 | Phase 3 | Pending |
-| IDE-07 | Phase 3 | Pending |
-| IDE-08 | Phase 3 | Pending |
+| IDE-05 | Phase 3 | Complete |
+| IDE-06 | Phase 3 | Complete |
+| IDE-07 | Phase 3 | Complete |
+| IDE-08 | Phase 3 | Complete |
 | IDE-09 | Phase 3 | Pending |
 | BRW-01 | Phase 5 | Pending |
 | BRW-02 | Phase 5 | Pending |
