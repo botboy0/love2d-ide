@@ -12,7 +12,7 @@ This milestone ships the foundation: a verified Love2D development environment, 
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Environment** - WSL2, Love2D 11.5, display/audio, and workspace fully verified and ready
+- [ ] **Phase 1: Environment** - Windows-native Love2D 11.5, display/audio, workspace, and ADB fully verified and ready
 - [ ] **Phase 2: Pong** - Complete Pong game rebuilt from scratch including AI paddle assignment
 - [ ] **Phase 3: IDE Shell** - Electron app with file tree, Lua editor, run button, console, live reload, and .love export
 - [ ] **Phase 4: Preview and Deploy** - Browser preview via love.js and one-click Android deployment via ADB
@@ -20,21 +20,21 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Environment
-**Goal**: Developer can run a Love2D game in WSL2 with display and audio working, course repos are accessible, and workspace structure is established
+**Goal**: Developer can run a Love2D game natively on Windows with display and audio working, course repos are accessible, and workspace structure is established
 **Depends on**: Nothing (first phase)
 **Requirements**: ENV-01, ENV-02, ENV-03, ENV-04, ENV-05, ENV-06, ENV-07
 **Success Criteria** (what must be TRUE):
-  1. Running `love --version` in WSL2 prints `11.5.x` and a test project opens a window with sound
-  2. CS50G reference repos for all 8 Love2D projects are cloned and browsable under `~/love2d-ide/course/`
+  1. Running Windows `love.exe --version` prints `11.5.x` and a test project opens a window with sound natively on Windows
+  2. CS50G reference repos for all 8 Love2D projects are cloned and browsable under workspace `course/`
   3. push.lua compatibility fix is applied and a CS50G project that uses push.lua launches without errors on Love2D 11.5
-  4. ADB is callable from WSL2 (via Windows alias) and `adb devices` returns a result
-  5. Workspace directories `course/`, `projects/`, and `ide/` exist with the standard project template in place
-**Plans**: TBD
+  4. Windows ADB platform-tools installed and `adb devices` works (callable from WSL via alias to adb.exe)
+  5. Workspace directories `course/`, `projects/`, and `ide/` exist on Windows filesystem with the standard project template in place
+**Plans:** 3 plans
 
 Plans:
-- [ ] 01-01: Install and verify Love2D 11.5, Lua 5.1/LuaJIT, and LuaRocks in WSL2
-- [ ] 01-02: Configure WSLg display/audio and verify Love2D can open a window with sound
-- [ ] 01-03: Clone CS50G repos, apply push.lua compatibility fix, set up workspace structure and ADB alias
+- [ ] 01-01-PLAN.md — Install Love2D 11.5, Lua tooling in WSL, create test project, verify display + audio on Windows
+- [ ] 01-02-PLAN.md — Clone CS50G repos, create workspace structure, build project template with patched push.lua
+- [ ] 01-03-PLAN.md — Configure Windows ADB with WSL alias, end-to-end Android deployment test
 
 ### Phase 2: Pong
 **Goal**: A complete, independently-written Pong game exists with working AI paddle, establishing the project template all future games will follow
