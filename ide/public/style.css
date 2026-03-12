@@ -489,6 +489,21 @@ html, body {
   color: var(--text);
 }
 
+.console-line.info {
+  color: var(--overlay0);
+  font-style: italic;
+}
+
+.error-link {
+  color: var(--blue);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.error-link:hover {
+  opacity: 0.8;
+}
+
 /* ============================================================
    Mobile responsive — 768px breakpoint
    ============================================================ */

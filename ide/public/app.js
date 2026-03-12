@@ -260,6 +260,16 @@ async function saveCurrentFile() {
     isDirty = false;
     updateEditorHeader();
     showStatus('Saved', 'ok');
+
+    // Trigger immediate game restart if game is running
+    // This gives instant feedback without waiting for chokidar's 350ms debounce
+    if (gameRunning) {
+      try {
+        await fetch('/api/run', { method: 'POST' });
+      } catch {
+        // Non-fatal — chokidar will still catch it
+      }
+    }
   } catch (err) {
     showStatus(`Save failed: ${err.message}`, 'error');
   }
@@ -416,16 +426,56 @@ window.addEventListener('resize', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Toolbar buttons (stubs for Plan 02/03)
+// Game process state
 // ---------------------------------------------------------------------------
-document.getElementById('btn-run').addEventListener('click', () => {
-  console.log('TODO: wire Run in Plan 02');
-  showStatus('Run: coming in Plan 02', 'ok');
+let gameRunning = false;
+
+function setGameRunning(running) {
+  gameRunning = running;
+  const runBtn = document.getElementById('btn-run');
+  const stopBtn = document.getElementById('btn-stop');
+  const statusEl = document.getElementById('game-status');
+
+  if (running) {
+    runBtn.disabled = true;
+    runBtn.style.opacity = '0.5';
+    if (statusEl) {
+      statusEl.textContent = 'Running';
+      statusEl.style.color = 'var(--green)';
+    }
+  } else {
+    runBtn.disabled = false;
+    runBtn.style.opacity = '';
+    if (statusEl) {
+      statusEl.textContent = 'Stopped';
+      statusEl.style.color = 'var(--overlay0)';
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Toolbar buttons
+// ---------------------------------------------------------------------------
+document.getElementById('btn-run').addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/run', { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    setGameRunning(true);
+    showStatus('Running', 'ok');
+  } catch (err) {
+    showStatus(`Run failed: ${err.message}`, 'error');
+  }
 });
 
-document.getElementById('btn-stop').addEventListener('click', () => {
-  console.log('TODO: wire Stop in Plan 02');
-  showStatus('Stop: coming in Plan 02', 'ok');
+document.getElementById('btn-stop').addEventListener('click', async () => {
+  try {
+    const res = await fetch('/api/run/stop', { method: 'POST' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    setGameRunning(false);
+    showStatus('Stopped', 'ok');
+  } catch (err) {
+    showStatus(`Stop failed: ${err.message}`, 'error');
+  }
 });
 
 document.getElementById('btn-export').addEventListener('click', () => {
@@ -442,6 +492,128 @@ document.getElementById('btn-clear-console').addEventListener('click', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Error linkification helper
+// ---------------------------------------------------------------------------
+const ERROR_LINK_RE = /([^:\s]+\.lua):(\d+)/g;
+
+/**
+ * Convert file:line references in stderr text into clickable anchor elements.
+ * Returns a DocumentFragment with text nodes and anchor elements.
+ *
+ * @param {string} text
+ * @returns {DocumentFragment}
+ */
+function linkifyErrors(text) {
+  const fragment = document.createDocumentFragment();
+  let lastIndex = 0;
+  let match;
+
+  ERROR_LINK_RE.lastIndex = 0;
+  while ((match = ERROR_LINK_RE.exec(text)) !== null) {
+    // Text before the match
+    if (match.index > lastIndex) {
+      fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+    }
+
+    const anchor = document.createElement('a');
+    anchor.href = '#';
+    anchor.className = 'error-link';
+    anchor.dataset.file = match[1];
+    anchor.dataset.line = match[2];
+    anchor.textContent = `${match[1]}:${match[2]}`;
+    fragment.appendChild(anchor);
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  // Remaining text after last match
+  if (lastIndex < text.length) {
+    fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
+  }
+
+  return fragment;
+}
+
+// ---------------------------------------------------------------------------
+// Console SSE stream
+// ---------------------------------------------------------------------------
+const consoleOutput = document.getElementById('console-output');
+
+const es = new EventSource('/api/console/stream');
+
+es.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  const { stream, text } = data;
+
+  // Remove placeholder text on first real output
+  const placeholder = consoleOutput.querySelector('.console-placeholder');
+  if (placeholder) placeholder.remove();
+
+  const line = document.createElement('div');
+  line.className = `console-line ${stream}`;
+
+  if (stream === 'stderr') {
+    line.appendChild(linkifyErrors(text));
+  } else {
+    line.textContent = text;
+  }
+
+  consoleOutput.appendChild(line);
+
+  // Auto-scroll to bottom
+  consoleOutput.scrollTop = consoleOutput.scrollHeight;
+};
+
+es.addEventListener('clear', () => {
+  consoleOutput.innerHTML = '';
+  setGameRunning(true);
+});
+
+es.onerror = () => {
+  // EventSource will auto-reconnect — no manual action needed
+};
+
+// ---------------------------------------------------------------------------
+// Error link click delegation
+// ---------------------------------------------------------------------------
+consoleOutput.addEventListener('click', async (e) => {
+  const link = e.target.closest('.error-link');
+  if (!link) return;
+
+  e.preventDefault();
+
+  const file = link.dataset.file;
+  const line = parseInt(link.dataset.line, 10);
+
+  try {
+    const res = await fetch(`/api/files/${encodeURIPath(file)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const content = await res.text();
+
+    // Find the matching tree item if present, otherwise pass null
+    const treeItem = fileTreeEl.querySelector(`[data-path="${CSS.escape(file)}"]`) || null;
+    await openFile(file, treeItem);
+
+    // Navigate to the error line after model is loaded
+    // Use a brief timeout to let Monaco finish setting the model
+    setTimeout(() => {
+      goToLine(line);
+    }, 50);
+  } catch (err) {
+    showStatus(`Cannot open ${file}: ${err.message}`, 'error');
+  }
+});
+
+// ---------------------------------------------------------------------------
+// goToLine — navigate Monaco editor to a specific line
+// ---------------------------------------------------------------------------
+function goToLine(lineNumber) {
+  editor.revealLineInCenter(lineNumber);
+  editor.setPosition({ lineNumber, column: 1 });
+  editor.focus();
+}
+
+// ---------------------------------------------------------------------------
 // Refresh file tree button
 // ---------------------------------------------------------------------------
 document.getElementById('btn-refresh-tree').addEventListener('click', loadFileTree);
@@ -450,3 +622,16 @@ document.getElementById('btn-refresh-tree').addEventListener('click', loadFileTr
 // Bootstrap
 // ---------------------------------------------------------------------------
 loadFileTree();
+
+// Sync game running state with server on page load
+(async () => {
+  try {
+    const res = await fetch('/api/run/status');
+    if (res.ok) {
+      const { running } = await res.json();
+      setGameRunning(running);
+    }
+  } catch {
+    // Non-fatal
+  }
+})();
