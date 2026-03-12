@@ -62,7 +62,7 @@ Plans:
   5. Saving a Lua file causes the game to automatically restart within one second (live reload)
   6. When Love2D reports an error, the IDE displays the file name and line number; developer can click it to navigate there
   7. Developer can export the current project as a `.love` file from the IDE
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 - [ ] 03-01-PLAN.md — Server foundation, Monaco Editor bundle with Catppuccin theme, UI shell with file tree and mobile tabs
@@ -98,6 +98,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Environment | 3/3 | Complete | 2026-03-12 |
 | 2. Pong Scaffold | 1/1 | Complete | 2026-03-12 |
-| 3. Web IDE | 0/3 | Not started | - |
+| 3. Web IDE | 1/3 | In Progress|  |
 | 4. Pong Rebuild | 0/? | Not started | - |
 | 5. Preview and Deploy | 0/? | Not started | - |
