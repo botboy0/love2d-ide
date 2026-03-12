@@ -1,4 +1,6 @@
 import * as monaco from 'monaco-editor';
+import { MonacoLanguageClient } from 'monaco-languageclient';
+import { WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc/socket';
 
 // Tell Monaco where to find its web worker
 self.MonacoEnvironment = {
@@ -143,4 +145,69 @@ monaco.editor.defineTheme('catppuccin-latte', {
   },
 });
 
-export { monaco };
+// ---------------------------------------------------------------------------
+// LSP client — connects Monaco to lua-language-server via WebSocket
+// ---------------------------------------------------------------------------
+
+/**
+ * Connect to the Lua Language Server WebSocket proxy.
+ * Creates a MonacoLanguageClient that bridges the /lsp endpoint to Monaco.
+ *
+ * Safe to call even if LSP is not configured on the server — it will just fail
+ * silently after the WebSocket connection attempt times out or is refused.
+ *
+ * @param {string} wsUrl  e.g. 'ws://localhost:3000/lsp'
+ */
+function connectLsp(wsUrl) {
+  const ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    const socket = toIWebSocket(ws);
+    const reader = new WebSocketMessageReader(socket);
+    const writer = new WebSocketMessageWriter(socket);
+
+    const client = new MonacoLanguageClient({
+      name: 'Lua Language Client',
+      clientOptions: {
+        documentSelector: [{ language: 'lua' }],
+        errorHandler: {
+          error: () => ({ action: 1 /* ErrorAction.Continue */ }),
+          closed: () => ({ action: 2 /* CloseAction.DoNotRestart */ }),
+        },
+      },
+      messageTransports: { reader, writer },
+    });
+
+    client.start();
+
+    reader.onClose(() => client.stop());
+  };
+
+  ws.onerror = (e) => {
+    // LSP not available — IDE continues without diagnostics
+    console.debug('LSP WebSocket error (LSP disabled or unavailable):', e.type);
+  };
+}
+
+/**
+ * Wrap a native WebSocket into the IWebSocket interface expected by vscode-ws-jsonrpc.
+ * @param {WebSocket} ws
+ * @returns {import('vscode-ws-jsonrpc').IWebSocket}
+ */
+function toIWebSocket(ws) {
+  return {
+    send: (content) => ws.send(content),
+    onMessage: (cb) => {
+      ws.addEventListener('message', (e) => cb(e.data));
+    },
+    onError: (cb) => {
+      ws.addEventListener('error', (e) => cb(e));
+    },
+    onClose: (cb) => {
+      ws.addEventListener('close', (e) => cb(e.code, e.reason));
+    },
+    dispose: () => ws.close(),
+  };
+}
+
+export { monaco, connectLsp };

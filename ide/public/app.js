@@ -6,7 +6,7 @@
 // ---------------------------------------------------------------------------
 // Monaco init
 // ---------------------------------------------------------------------------
-const { monaco } = window.MonacoIDE;
+const { monaco, connectLsp } = window.MonacoIDE;
 
 const savedTheme = localStorage.getItem('ide-theme') || 'catppuccin-mocha';
 const editorEl = document.getElementById('editor-container');
@@ -28,6 +28,11 @@ const editor = monaco.editor.create(editorEl, {
 
 // Apply theme to HTML element as well
 applyTheme(savedTheme === 'catppuccin-mocha' ? 'dark' : 'light');
+
+// Connect Lua Language Server (gracefully disabled if not configured on server)
+if (typeof connectLsp === 'function') {
+  connectLsp('ws://' + location.host + '/lsp');
+}
 
 // ---------------------------------------------------------------------------
 // State

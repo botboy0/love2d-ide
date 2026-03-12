@@ -9,6 +9,8 @@ ide/public/editor.bundle.js
 ide/public/editor.bundle.css
 ide/public/editor.worker.js
 ide/public/codicon.ttf
+ide/public/codicon-*.ttf
+ide/public/opacity-background*.png
 
 # OS
 .DS_Store

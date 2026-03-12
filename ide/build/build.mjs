@@ -1,7 +1,7 @@
 import { build } from 'esbuild';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { copyFileSync, mkdirSync } from 'fs';
+import { mkdirSync } from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,11 +22,8 @@ async function run() {
   });
   console.log('  -> public/editor.worker.js');
 
-  // Copy codicon font so Monaco's CSS can reference it correctly
-  const codiconSrc = join(root, 'node_modules/monaco-editor/esm/vs/base/browser/ui/codicons/codicon/codicon.ttf');
+  // Ensure public dir exists (esbuild handles asset copying)
   mkdirSync(join(root, 'public'), { recursive: true });
-  copyFileSync(codiconSrc, join(root, 'public/codicon.ttf'));
-  console.log('  -> public/codicon.ttf (copied)');
 
   console.log('Building Monaco editor bundle...');
   await build({
@@ -43,8 +40,11 @@ async function run() {
       '.ttf': 'file',
       '.woff': 'file',
       '.woff2': 'file',
+      '.png': 'file',
+      '.jpg': 'file',
+      '.svg': 'file',
     },
-    assetNames: '[name]',
+    assetNames: '[name]-[hash]',
     publicPath: '/',
     logOverride: {
       'commonjs-variable-in-esm': 'silent',
