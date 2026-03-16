@@ -30,11 +30,27 @@ function love.update(dt)
 	ballx = ballx + ballspdx * dt * 100
 	bally = bally + ballspdy * dt * 100
 
-	if ballx <= 0 or ballx >= VIRTUAL_WIDTH then
-		ballspdx = ballspdx * -1
+	if ballx <= paddleWidth then
+		if bally + ballsize > paddle1y and bally < paddle1y + paddleHeight then
+			ballspdx = ballspdx * -1
+			ballx = paddleWidth
+		else
+			ballx = VIRTUAL_WIDTH / 2 - ballsize / 2
+			bally = VIRTUAL_HEIGHT / 2 - ballsize / 2
+		end
 	end
 
-	if bally <= 0 or bally >= VIRTUAL_HEIGHT then
+	if ballx + ballsize >= VIRTUAL_WIDTH - paddleWidth then
+		if bally + ballsize > paddle2y and bally < paddle2y + paddleHeight then
+			ballspdx = ballspdx * -1
+			ballx = VIRTUAL_WIDTH - paddleWidth - ballsize
+		else
+			ballx = VIRTUAL_WIDTH / 2 - ballsize / 2
+			bally = VIRTUAL_HEIGHT / 2 - ballsize / 2
+		end
+	end
+
+	if bally < 0 or bally + ballsize > VIRTUAL_HEIGHT then
 		ballspdy = ballspdy * -1
 	end
 
