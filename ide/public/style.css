@@ -207,6 +207,11 @@ html, body {
   color: var(--crust);
 }
 
+.btn-save {
+  background: var(--mauve);
+  color: var(--crust);
+}
+
 .btn-export {
   background: var(--blue);
   color: var(--crust);
@@ -612,12 +617,12 @@ html, body {
     display: none;
   }
 
-  /* Allow native touch scrolling inside Monaco */
+  /* Allow native touch scrolling + text selection inside Monaco */
   #editor-container,
   #editor-container .overflow-guard,
   #editor-container .monaco-scrollable-element,
   #editor-container .monaco-editor {
-    touch-action: pan-y !important;
+    touch-action: auto !important;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -632,4 +637,53 @@ html, body {
     height: 34px;
     font-size: 14px;
   }
+}
+
+/* Touch selection handles */
+.touch-sel-handle {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--blue, #89b4fa);
+  border: 2px solid var(--bg, #1e1e2e);
+  transform: translate(-50%, 0);
+  z-index: 200;
+  touch-action: none;
+  cursor: grab;
+}
+.touch-sel-handle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 2px;
+  height: 8px;
+  background: var(--blue, #89b4fa);
+  transform: translateX(-50%);
+}
+
+/* Touch context menu */
+.touch-ctx-menu {
+  position: absolute;
+  display: flex;
+  gap: 2px;
+  z-index: 201;
+  background: var(--bg-toolbar, #313244);
+  border: 1px solid var(--border, #45475a);
+  border-radius: 6px;
+  padding: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.touch-ctx-menu button {
+  background: none;
+  border: none;
+  color: var(--text, #cdd6f4);
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+.touch-ctx-menu button:active {
+  background: var(--surface0, #45475a);
 }

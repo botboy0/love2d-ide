@@ -1,5 +1,4 @@
 import express from 'express';
-import http from 'http';
 import https from 'https';
 import { fileURLToPath } from 'url';
 import { dirname, join, resolve } from 'path';
@@ -18,6 +17,9 @@ const __dirname = dirname(__filename);
 // Load config
 const configPath = join(__dirname, 'config.json');
 const config = JSON.parse(readFileSync(configPath, 'utf8'));
+
+// Resolve relative projectPath against ide/ directory
+config.projectPath = resolve(__dirname, config.projectPath);
 
 const app = express();
 const port = config.port || 3000;
@@ -60,7 +62,11 @@ app.get('/api/console/stream', consoleStream);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', projectPath: config.projectPath });
+  res.json({
+    status: 'ok',
+    projectPath: config.projectPath,
+    loveApiPath: resolve(__dirname, 'lib/love2d-api/library'),
+  });
 });
 
 // Serve index.html for all other routes (SPA fallback)
@@ -87,48 +93,38 @@ function getLocalIP() {
   return fallback ? fallback.address : candidates[0]?.address || 'localhost';
 }
 
-// Create HTTP server explicitly so WebSocket can attach to it
-const httpServer = http.createServer(app);
-
-// HTTPS server for mobile access (SharedArrayBuffer requires secure context)
+// HTTPS-only server (SharedArrayBuffer requires secure context)
 const certPath = join(__dirname, 'cert.pem');
 const keyPath = join(__dirname, 'key.pem');
-let httpsServer;
-if (existsSync(certPath) && existsSync(keyPath)) {
-  const sslOpts = {
-    key: readFileSync(keyPath),
-    cert: readFileSync(certPath),
-  };
-  httpsServer = https.createServer(sslOpts, app);
+
+if (!existsSync(certPath) || !existsSync(keyPath)) {
+  console.error('Missing cert.pem / key.pem — run mkcert to generate them in ide/');
+  process.exit(1);
 }
 
-const httpsPort = (config.httpsPort || port + 1);
+const sslOpts = {
+  key: readFileSync(keyPath),
+  cert: readFileSync(certPath),
+};
+const server = https.createServer(sslOpts, app);
 
-httpServer.listen(port, '0.0.0.0', () => {
+server.listen(port, '0.0.0.0', () => {
   const localIP = getLocalIP();
-  console.log(`Love2D IDE started`);
-  console.log(`  Local:   http://localhost:${port}`);
-  console.log(`  Network: http://${localIP}:${port}`);
+  console.log(`Love2D IDE started (HTTPS)`);
+  console.log(`  Local:   https://localhost:${port}`);
+  console.log(`  Network: https://${localIP}:${port}`);
   console.log(`  Project: ${config.projectPath}`);
 
   // Start file watcher for live reload
   startWatcher(config.projectPath, config.lovePath);
   console.log(`  Watcher: watching ${config.projectPath}`);
 
-  // Attach Lua LSP WebSocket proxy to HTTP
-  attachLspProxy(httpServer, config.lsPath);
-  if (config.lsPath) {
-    console.log(`  LSP:     lua-language-server at ${config.lsPath}`);
+  // Attach Lua LSP WebSocket proxy
+  const lsAbsPath = config.lsPath ? resolve(__dirname, config.lsPath) : '';
+  attachLspProxy(server, lsAbsPath, config.projectPath);
+  if (lsAbsPath) {
+    console.log(`  LSP:     lua-language-server at ${lsAbsPath}`);
   }
 });
 
-if (httpsServer) {
-  httpsServer.listen(httpsPort, '0.0.0.0', () => {
-    const localIP = getLocalIP();
-    console.log(`  HTTPS:   https://${localIP}:${httpsPort}  (mobile — accept the cert warning)`);
-    // Attach LSP proxy to HTTPS server too
-    attachLspProxy(httpsServer, config.lsPath);
-  });
-}
-
-export default httpServer;
+export default server;

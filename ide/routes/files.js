@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { readdirSync, statSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, resolve, relative, normalize } from 'path';
+import { execFileSync } from 'child_process';
 
 const SKIP_NAMES = new Set([
   'node_modules', '.git', '.DS_Store', 'Thumbs.db', '.ide-console.log',
@@ -119,7 +120,19 @@ export function filesRouter(config) {
       const parentDir = join(fullPath, '..');
       mkdirSync(parentDir, { recursive: true });
       writeFileSync(fullPath, req.body, 'utf8');
-      res.json({ ok: true, path: relativePath });
+
+      // Auto-format Lua files with StyLua
+      if (relativePath.endsWith('.lua')) {
+        try {
+          execFileSync('stylua', [fullPath], { timeout: 5000 });
+        } catch {
+          // Format failed — file is still saved unformatted
+        }
+      }
+
+      // Return formatted content so editor can update
+      const content = readFileSync(fullPath, 'utf8');
+      res.json({ ok: true, path: relativePath, content });
     } catch (err) {
       res.status(500).json({ error: err.message });
     }

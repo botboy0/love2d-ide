@@ -1,6 +1,4 @@
 import * as monaco from 'monaco-editor';
-import { MonacoLanguageClient } from 'monaco-languageclient';
-import { WebSocketMessageReader, WebSocketMessageWriter } from 'vscode-ws-jsonrpc/socket';
 
 // Tell Monaco where to find its web worker
 self.MonacoEnvironment = {
@@ -158,56 +156,144 @@ monaco.editor.defineTheme('catppuccin-latte', {
  *
  * @param {string} wsUrl  e.g. 'ws://localhost:3000/lsp'
  */
-function connectLsp(wsUrl) {
-  const ws = new WebSocket(wsUrl);
+/**
+ * Raw LSP client over WebSocket.
+ * Handles initialize, textDocument/didOpen, completion, and diagnostics.
+ */
+function connectLsp(wsUrl, rootPath) {
+  let ws, reqId = 1, pending = {}, serverCaps = null;
+  const openDocs = new Map(); // uri -> version
+  let completionDisposable = null;
 
-  ws.onopen = () => {
-    const socket = toIWebSocket(ws);
-    const reader = new WebSocketMessageReader(socket);
-    const writer = new WebSocketMessageWriter(socket);
-
-    const client = new MonacoLanguageClient({
-      name: 'Lua Language Client',
-      clientOptions: {
-        documentSelector: [{ language: 'lua' }],
-        errorHandler: {
-          error: () => ({ action: 1 /* ErrorAction.Continue */ }),
-          closed: () => ({ action: 2 /* CloseAction.DoNotRestart */ }),
+  function connect() {
+    ws = new WebSocket(wsUrl);
+    ws.onopen = () => {
+      send('initialize', {
+        processId: null,
+        rootUri: rootPath ? 'file://' + rootPath : null,
+        capabilities: {
+          workspace: { configuration: true },
+          textDocument: {
+            completion: { completionItem: { snippetSupport: true, labelDetailsSupport: true } },
+            publishDiagnostics: { relatedInformation: true },
+            synchronization: { dynamicRegistration: false, willSave: false, didSave: false, willSaveWaitUntil: false },
+          },
         },
-      },
-      messageTransports: { reader, writer },
+        workspaceFolders: rootPath ? [{ uri: 'file://' + rootPath, name: 'project' }] : null,
+      }).then((result) => {
+        serverCaps = result.capabilities;
+        notify('initialized', {});
+        registerProviders();
+        // Sync any already-open models
+        for (const model of monaco.editor.getModels()) {
+          if (model.getLanguageId() === 'lua') sendDidOpen(model);
+        }
+        document.title = 'Love2D IDE';
+      });
+    };
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+      // Response to our request
+      if (msg.id != null && pending[msg.id]) {
+        pending[msg.id](msg.result, msg.error);
+        delete pending[msg.id];
+      }
+      // Server notification
+      if (msg.method === 'textDocument/publishDiagnostics') {
+        handleDiagnostics(msg.params);
+      }
+    };
+
+    ws.onerror = () => {};
+    ws.onclose = () => {};
+  }
+
+  function send(method, params) {
+    return new Promise((resolve) => {
+      const id = reqId++;
+      pending[id] = resolve;
+      ws.send(JSON.stringify({ jsonrpc: '2.0', id, method, params }));
+    });
+  }
+
+  function notify(method, params) {
+    ws.send(JSON.stringify({ jsonrpc: '2.0', method, params }));
+  }
+
+  function sendDidOpen(model) {
+    const uri = model.uri.toString();
+    if (openDocs.has(uri)) return;
+    const version = 1;
+    openDocs.set(uri, version);
+    notify('textDocument/didOpen', {
+      textDocument: { uri, languageId: 'lua', version, text: model.getValue() },
     });
 
-    client.start();
+    // Track changes
+    model.onDidChangeContent(() => {
+      const v = (openDocs.get(uri) || 1) + 1;
+      openDocs.set(uri, v);
+      notify('textDocument/didChange', {
+        textDocument: { uri, version: v },
+        contentChanges: [{ text: model.getValue() }],
+      });
+    });
+  }
 
-    reader.onClose(() => client.stop());
-  };
+  function registerProviders() {
+    // Completion provider
+    completionDisposable = monaco.languages.registerCompletionItemProvider('lua', {
+      triggerCharacters: ['.', ':'],
+      provideCompletionItems: async (model, position) => {
+        const uri = model.uri.toString();
+        if (!openDocs.has(uri)) sendDidOpen(model);
+        const result = await send('textDocument/completion', {
+          textDocument: { uri },
+          position: { line: position.lineNumber - 1, character: position.column - 1 },
+        });
+        if (!result) return { suggestions: [] };
+        const items = result.items || result;
+        return {
+          suggestions: items.map((item) => ({
+            label: item.label,
+            kind: item.kind || 1,
+            insertText: item.textEdit?.newText || item.insertText || item.label,
+            insertTextRules: item.insertTextFormat === 2
+              ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+              : undefined,
+            detail: item.detail || '',
+            documentation: item.documentation?.value || item.documentation || '',
+            range: undefined,
+          })),
+        };
+      },
+    });
 
-  ws.onerror = (e) => {
-    // LSP not available — IDE continues without diagnostics
-    console.debug('LSP WebSocket error (LSP disabled or unavailable):', e.type);
-  };
-}
+    // Listen for new models
+    monaco.editor.onDidCreateModel((model) => {
+      if (model.getLanguageId() === 'lua') sendDidOpen(model);
+    });
+  }
 
-/**
- * Wrap a native WebSocket into the IWebSocket interface expected by vscode-ws-jsonrpc.
- * @param {WebSocket} ws
- * @returns {import('vscode-ws-jsonrpc').IWebSocket}
- */
-function toIWebSocket(ws) {
-  return {
-    send: (content) => ws.send(content),
-    onMessage: (cb) => {
-      ws.addEventListener('message', (e) => cb(e.data));
-    },
-    onError: (cb) => {
-      ws.addEventListener('error', (e) => cb(e));
-    },
-    onClose: (cb) => {
-      ws.addEventListener('close', (e) => cb(e.code, e.reason));
-    },
-    dispose: () => ws.close(),
-  };
+  // Diagnostics → Monaco markers
+  function handleDiagnostics(params) {
+    const uri = monaco.Uri.parse(params.uri);
+    const model = monaco.editor.getModel(uri);
+    if (!model) return;
+    const markers = (params.diagnostics || []).map((d) => ({
+      severity: [0, 8, 4, 2, 1][d.severity] || 8,
+      startLineNumber: d.range.start.line + 1,
+      startColumn: d.range.start.character + 1,
+      endLineNumber: d.range.end.line + 1,
+      endColumn: d.range.end.character + 1,
+      message: d.message,
+      source: d.source || 'lua',
+    }));
+    monaco.editor.setModelMarkers(model, 'lua-lsp', markers);
+  }
+
+  connect();
 }
 
 export { monaco, connectLsp };

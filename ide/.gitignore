@@ -1,3 +1,6 @@
 
 # TLS certs (generated per machine)
 *.pem
+
+# Lua Language Server (downloaded binary)
+lib/lua-language-server/

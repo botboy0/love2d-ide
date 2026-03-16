@@ -7,12 +7,98 @@
   <link rel="stylesheet" href="style.css">
   <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; display: flex; align-items: center; justify-content: center; }
-    #canvas { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+    #game-area { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+    #canvas { display: block; max-width: 100%; max-height: 100%; object-fit: contain; flex: 1; }
+    .touch-controls { display: flex; flex-direction: column; gap: 8px; padding: 8px; z-index: 10; }
+    .touch-btn {
+      width: 56px; height: 56px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 24px;
+      display: flex; align-items: center; justify-content: center;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .touch-btn:active, .touch-btn.pressed {
+      background: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.6);
+    }
   </style>
 </head>
 <body>
-  <canvas id="canvas"></canvas>
+  <div id="game-area">
+    <div class="touch-controls" id="p1-controls">
+      <button class="touch-btn" data-key="w">&#9650;</button>
+      <button class="touch-btn" data-key="s">&#9660;</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div class="touch-controls" id="p2-controls">
+      <button class="touch-btn" data-key="ArrowUp">&#9650;</button>
+      <button class="touch-btn" data-key="ArrowDown">&#9660;</button>
+    </div>
+  </div>
   <div id="spinner" class="pending"></div>
+  <script>
+    // Forward print/error output to parent IDE console panel
+    var _origLog = console.log;
+    var _origErr = console.error;
+    console.log = function() {
+      var msg = Array.prototype.slice.call(arguments).join(' ');
+      parent.postMessage({ type: 'lovejs-console', stream: 'stdout', text: msg }, '*');
+      _origLog.apply(console, arguments);
+    };
+    console.error = function() {
+      var msg = Array.prototype.slice.call(arguments).join(' ');
+      parent.postMessage({ type: 'lovejs-console', stream: 'stderr', text: msg }, '*');
+      _origErr.apply(console, arguments);
+    };
+    // Capture Lua print() — Emscripten routes it through Module.print
+    window.Module = window.Module || {};
+    window.Module.print = function(text) {
+      parent.postMessage({ type: 'lovejs-console', stream: 'stdout', text: text }, '*');
+      _origLog(text);
+    };
+    window.Module.printErr = function(text) {
+      parent.postMessage({ type: 'lovejs-console', stream: 'stderr', text: text }, '*');
+      _origErr(text);
+    };
+  </script>
+  <script>
+    // Touch buttons → keyboard events for love.js canvas
+    document.querySelectorAll('.touch-btn').forEach(function(btn) {
+      var key = btn.dataset.key;
+      var keyCodes = { w: 87, s: 83, ArrowUp: 38, ArrowDown: 40 };
+      function sendKey(type) {
+        document.dispatchEvent(new KeyboardEvent(type, {
+          key: key,
+          code: key.length === 1 ? 'Key' + key.toUpperCase() : key,
+          keyCode: keyCodes[key] || 0,
+          which: keyCodes[key] || 0,
+          bubbles: true, cancelable: true
+        }));
+      }
+
+      btn.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        btn.classList.add('pressed');
+        sendKey('keydown');
+      }, { passive: false });
+
+      btn.addEventListener('touchend', function(e) {
+        e.preventDefault();
+        btn.classList.remove('pressed');
+        sendKey('keyup');
+      }, { passive: false });
+
+      btn.addEventListener('touchcancel', function() {
+        btn.classList.remove('pressed');
+        sendKey('keyup');
+      });
+    });
+  </script>
   <script src="player.js?g=/api/game.love&v=11.5&c=1&n=1"></script>
 </body>
 </html>

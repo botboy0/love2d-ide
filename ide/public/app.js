@@ -37,34 +37,296 @@ const editor = monaco.editor.create(editorEl, {
   // Mobile: disable hover widgets that get in the way
   hover: isMobile ? { enabled: false } : {},
   overviewRulerLanes: isMobile ? 0 : 3,
-  quickSuggestions: isMobile ? false : true,
-  parameterHints: isMobile ? { enabled: false } : {},
+  quickSuggestions: true,
+  parameterHints: {},
+  contextmenu: !isMobile,
+  // Mobile: prevent tap from selecting whole words
+  selectionHighlight: isMobile ? false : true,
+  occurrencesHighlight: isMobile ? 'off' : 'singleFile',
+  mouseStyle: 'text',
 });
+
+// Mobile: single tap places cursor, long press handled by touch selection code above
+if (isMobile) {
+  let touchStartTime = 0;
+  editorEl.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) touchStartTime = Date.now();
+  }, { passive: true });
+
+  editorEl.addEventListener('touchend', (e) => {
+    if (e.changedTouches.length !== 1) return;
+    const duration = Date.now() - touchStartTime;
+    if (duration > 300) return; // long press — let touch selection handler deal with it
+
+    const touch = e.changedTouches[0];
+    const target = editor.getTargetAtClientPoint(touch.clientX, touch.clientY);
+    if (target && target.position) {
+      setTimeout(() => {
+        const sel = editor.getSelection();
+        if (sel && !sel.isEmpty()) {
+          editor.setPosition(target.position);
+        }
+      }, 10);
+    }
+  }, { passive: true });
+}
 
 // Mobile: allow native touch scrolling inside Monaco's scroll container
 if (isMobile) {
   const applyTouchFix = () => {
     const monacoLines = editorEl.querySelector('.monaco-scrollable-element');
     if (monacoLines) {
-      monacoLines.style.touchAction = 'pan-y';
+      monacoLines.style.touchAction = 'auto';
     }
-    // Also fix the overlay widgets container
     const overlays = editorEl.querySelectorAll('.overflow-guard, .monaco-editor');
-    overlays.forEach(el => { el.style.touchAction = 'pan-y'; });
+    overlays.forEach(el => { el.style.touchAction = 'auto'; });
   };
-  // Apply after Monaco finishes layout
   setTimeout(applyTouchFix, 100);
   editor.onDidChangeModel(() => setTimeout(applyTouchFix, 100));
+
+  // --- Touch text selection (long-press to select, drag handles to extend) ---
+  (function initTouchSelection() {
+    let longPressTimer = null;
+    let startTouch = null;
+    let selectionActive = false;
+    let draggingHandle = null; // 'left' | 'right' | null
+
+    // Create drag handles
+    const leftHandle = document.createElement('div');
+    const rightHandle = document.createElement('div');
+    leftHandle.className = 'touch-sel-handle touch-sel-left';
+    rightHandle.className = 'touch-sel-handle touch-sel-right';
+    leftHandle.style.display = 'none';
+    rightHandle.style.display = 'none';
+    editorEl.appendChild(leftHandle);
+    editorEl.appendChild(rightHandle);
+
+    // Create touch context menu
+    const touchMenu = document.createElement('div');
+    touchMenu.className = 'touch-ctx-menu';
+    touchMenu.style.display = 'none';
+    touchMenu.innerHTML = `
+      <button data-action="selectAll">Select All</button>
+      <button data-action="cut">Cut</button>
+      <button data-action="copy">Copy</button>
+      <button data-action="paste">Paste</button>
+    `;
+    editorEl.appendChild(touchMenu);
+
+    touchMenu.addEventListener('click', async (e) => {
+      const action = e.target.dataset.action;
+      if (!action) return;
+      e.stopPropagation();
+      if (action === 'selectAll') {
+        const model = editor.getModel();
+        if (model) {
+          const lastLine = model.getLineCount();
+          const lastCol = model.getLineMaxColumn(lastLine);
+          editor.setSelection(new monaco.Selection(1, 1, lastLine, lastCol));
+        }
+      } else if (action === 'copy') {
+        const sel = editor.getModel().getValueInRange(editor.getSelection());
+        await navigator.clipboard.writeText(sel);
+      } else if (action === 'cut') {
+        const selection = editor.getSelection();
+        const sel = editor.getModel().getValueInRange(selection);
+        await navigator.clipboard.writeText(sel);
+        editor.executeEdits('touch-cut', [{ range: selection, text: '' }]);
+      } else if (action === 'paste') {
+        const text = await navigator.clipboard.readText();
+        editor.executeEdits('touch-paste', [{ range: editor.getSelection(), text }]);
+      }
+      hideTouchUI();
+    });
+
+    function getEditorPosition(clientX, clientY) {
+      const target = editor.getTargetAtClientPoint(clientX, clientY);
+      return target && target.position ? target.position : null;
+    }
+
+    function positionHandles() {
+      const sel = editor.getSelection();
+      if (!sel || sel.isEmpty()) {
+        leftHandle.style.display = 'none';
+        rightHandle.style.display = 'none';
+        touchMenu.style.display = 'none';
+        return;
+      }
+
+      const startPos = { lineNumber: sel.startLineNumber, column: sel.startColumn };
+      const endPos = { lineNumber: sel.endLineNumber, column: sel.endColumn };
+
+      const startCoords = editor.getScrolledVisiblePosition(startPos);
+      const endCoords = editor.getScrolledVisiblePosition(endPos);
+      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+      const editorRect = editorEl.getBoundingClientRect();
+      const editorDomNode = editor.getDomNode();
+      const editorContentRect = editorDomNode.querySelector('.lines-content')?.getBoundingClientRect() || editorRect;
+
+      if (startCoords) {
+        leftHandle.style.display = '';
+        leftHandle.style.left = `${startCoords.left}px`;
+        leftHandle.style.top = `${startCoords.top + lineHeight}px`;
+      }
+      if (endCoords) {
+        rightHandle.style.display = '';
+        rightHandle.style.left = `${endCoords.left}px`;
+        rightHandle.style.top = `${endCoords.top + lineHeight}px`;
+      }
+
+      // Position context menu above selection
+      if (startCoords) {
+        touchMenu.style.display = 'flex';
+        const menuX = Math.max(4, Math.min(
+          (startCoords.left + (endCoords ? endCoords.left : startCoords.left)) / 2 - 60,
+          editorEl.clientWidth - 200
+        ));
+        touchMenu.style.left = `${menuX}px`;
+        touchMenu.style.top = `${Math.max(0, startCoords.top - 40)}px`;
+      }
+    }
+
+    function hideTouchUI() {
+      leftHandle.style.display = 'none';
+      rightHandle.style.display = 'none';
+      touchMenu.style.display = 'none';
+      selectionActive = false;
+    }
+
+    // Long-press to select word
+    editorEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      startTouch = { x: touch.clientX, y: touch.clientY };
+
+      longPressTimer = setTimeout(() => {
+        const pos = getEditorPosition(touch.clientX, touch.clientY);
+        if (!pos) return;
+
+        const model = editor.getModel();
+        const wordAtPos = model.getWordAtPosition(pos);
+        if (wordAtPos) {
+          editor.setSelection(new monaco.Selection(
+            pos.lineNumber, wordAtPos.startColumn,
+            pos.lineNumber, wordAtPos.endColumn
+          ));
+          selectionActive = true;
+          positionHandles();
+        } else {
+          // Empty spot — place cursor and show paste menu
+          editor.setPosition(pos);
+          selectionActive = true;
+          const coords = editor.getScrolledVisiblePosition(pos);
+          if (coords) {
+            leftHandle.style.display = 'none';
+            rightHandle.style.display = 'none';
+            touchMenu.style.display = 'flex';
+            const menuX = Math.max(4, Math.min(coords.left - 60, editorEl.clientWidth - 200));
+            touchMenu.style.top = `${Math.max(0, coords.top - 40)}px`;
+            touchMenu.style.left = `${menuX}px`;
+          }
+        }
+
+        // Haptic feedback if available
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 500);
+    }, { passive: true });
+
+    editorEl.addEventListener('touchmove', (e) => {
+      if (longPressTimer && startTouch && e.touches.length === 1) {
+        const touch = e.touches[0];
+        const dx = touch.clientX - startTouch.x;
+        const dy = touch.clientY - startTouch.y;
+        if (Math.sqrt(dx * dx + dy * dy) > 10) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      }
+    }, { passive: true });
+
+    editorEl.addEventListener('touchend', () => {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }, { passive: true });
+
+    // Tap elsewhere dismisses selection UI
+    editorEl.addEventListener('click', (e) => {
+      if (selectionActive && !e.target.closest('.touch-sel-handle') && !e.target.closest('.touch-ctx-menu')) {
+        hideTouchUI();
+      }
+    });
+
+    // Drag handles to extend selection
+    function handleTouchStart(side) {
+      return function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        draggingHandle = side;
+      };
+    }
+
+    leftHandle.addEventListener('touchstart', handleTouchStart('left'), { passive: false });
+    rightHandle.addEventListener('touchstart', handleTouchStart('right'), { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!draggingHandle) return;
+      e.preventDefault();
+      const touch = e.touches[0];
+      const pos = getEditorPosition(touch.clientX, touch.clientY);
+      if (!pos) return;
+
+      const sel = editor.getSelection();
+      if (draggingHandle === 'left') {
+        editor.setSelection(new monaco.Selection(
+          pos.lineNumber, pos.column,
+          sel.endLineNumber, sel.endColumn
+        ));
+      } else {
+        editor.setSelection(new monaco.Selection(
+          sel.startLineNumber, sel.startColumn,
+          pos.lineNumber, pos.column
+        ));
+      }
+      positionHandles();
+    }, { passive: false });
+
+    document.addEventListener('touchend', () => {
+      draggingHandle = null;
+    }, { passive: true });
+
+    // Reposition handles when selection changes programmatically
+    editor.onDidChangeCursorSelection(() => {
+      if (selectionActive) positionHandles();
+    });
+
+    // Hide on scroll
+    editor.onDidScrollChange(() => {
+      if (selectionActive) positionHandles();
+    });
+  })();
 }
 
 // Apply theme to HTML element as well
 applyTheme(savedTheme === 'catppuccin-mocha' ? 'dark' : 'light');
 
-// Connect Lua Language Server (gracefully disabled if not configured on server)
-if (typeof connectLsp === 'function') {
-  const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  connectLsp(wsProto + '//' + location.host + '/lsp');
-}
+// Fetch project path, then connect LSP with correct workspace root
+let projectRootPath = '/project';
+let loveApiPath = '';
+fetch('/api/health').then(r => r.json()).then(data => {
+  if (data.projectPath) projectRootPath = data.projectPath;
+  if (data.loveApiPath) loveApiPath = data.loveApiPath;
+  if (typeof connectLsp === 'function') {
+    try {
+      const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      console.log('Connecting LSP...', projectRootPath);
+      connectLsp(wsProto + '//' + location.host + '/lsp', projectRootPath);
+    } catch (err) {
+      console.error('LSP connectLsp threw:', err);
+      document.title = 'LSP ERR: ' + err.message;
+    }
+  }
+}).catch((err) => { console.error('LSP connect failed:', err); document.title = 'HEALTH ERR: ' + err.message; });
+
 
 // ---------------------------------------------------------------------------
 // Font size zoom controls
@@ -219,13 +481,21 @@ async function openFile(relativePath, treeItem) {
 
     // Determine language from extension
     const lang = getLanguageFromPath(relativePath);
-    const model = monaco.editor.createModel(content, lang);
+    const fileUri = monaco.Uri.parse('file://' + projectRootPath + '/' + relativePath);
+    // Reuse existing model for same URI, or create new one
+    let model = monaco.editor.getModel(fileUri);
+    if (model) {
+      model.setValue(content);
+    } else {
+      model = monaco.editor.createModel(content, lang, fileUri);
+    }
     const oldModel = editor.getModel();
     editor.setModel(model);
-    if (oldModel) oldModel.dispose();
+    if (oldModel && oldModel !== model) oldModel.dispose();
 
     currentFilePath = relativePath;
     isDirty = false;
+    localStorage.setItem('ide-last-file', relativePath);
     updateEditorHeader();
 
     // Update active tree item
@@ -296,10 +566,22 @@ editor.onDidChangeModelContent(() => {
   }
 });
 
+// Remember cursor position
+let cursorSaveEnabled = false;
+editor.onDidChangeCursorPosition((e) => {
+  if (cursorSaveEnabled && currentFilePath) {
+    localStorage.setItem('ide-cursor', JSON.stringify({
+      line: e.position.lineNumber,
+      column: e.position.column,
+    }));
+  }
+});
+
 // ---------------------------------------------------------------------------
 // File save (Ctrl+S / Cmd+S)
 // ---------------------------------------------------------------------------
 editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, saveCurrentFile);
+document.getElementById('btn-save').addEventListener('click', saveCurrentFile);
 
 async function saveCurrentFile() {
   if (!currentFilePath) return;
@@ -313,6 +595,14 @@ async function saveCurrentFile() {
     });
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    // Apply formatted content from server (StyLua)
+    const result = await res.json();
+    if (result.content && result.content !== content) {
+      const pos = editor.getPosition();
+      editor.setValue(result.content);
+      if (pos) editor.setPosition(pos);
+    }
 
     isDirty = false;
     updateEditorHeader();
@@ -730,6 +1020,29 @@ es.onerror = () => {
 };
 
 // ---------------------------------------------------------------------------
+// love.js iframe console output (browser mode)
+// ---------------------------------------------------------------------------
+window.addEventListener('message', (event) => {
+  if (!event.data || event.data.type !== 'lovejs-console') return;
+  const { stream, text } = event.data;
+
+  const placeholder = consoleOutput.querySelector('.console-placeholder');
+  if (placeholder) placeholder.remove();
+
+  const line = document.createElement('div');
+  line.className = `console-line ${stream}`;
+
+  if (stream === 'stderr') {
+    line.appendChild(linkifyErrors(text));
+  } else {
+    line.textContent = text;
+  }
+
+  consoleOutput.appendChild(line);
+  consoleOutput.scrollTop = consoleOutput.scrollHeight;
+});
+
+// ---------------------------------------------------------------------------
 // Error link click delegation
 // ---------------------------------------------------------------------------
 consoleOutput.addEventListener('click', async (e) => {
@@ -777,7 +1090,24 @@ document.getElementById('btn-refresh-tree').addEventListener('click', loadFileTr
 // ---------------------------------------------------------------------------
 // Bootstrap
 // ---------------------------------------------------------------------------
-loadFileTree();
+loadFileTree().then(async () => {
+  const lastFile = localStorage.getItem('ide-last-file');
+  if (lastFile) {
+    const treeItem = fileTreeEl.querySelector(`[data-path="${CSS.escape(lastFile)}"]`) || null;
+    await openFile(lastFile, treeItem);
+    const saved = localStorage.getItem('ide-cursor');
+    if (saved) {
+      // Delay restore — Monaco resets cursor after layout shifts (especially on mobile)
+      await new Promise(r => setTimeout(r, 200));
+      try {
+        const { line, column } = JSON.parse(saved);
+        editor.setPosition({ lineNumber: line, column });
+        editor.revealLineInCenter(line);
+      } catch {}
+    }
+  }
+  cursorSaveEnabled = true;
+});
 
 // Game always starts as not running on page load (in-browser player)
 setGameRunning(false);
